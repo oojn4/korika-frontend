@@ -1,0 +1,23 @@
+{
+  "app-name": "Climate Smart Indonesia",
+  "header": {
+    "home": "Home",
+    "articles": "Articles",
+    "users": "Members",
+    "courses": "Improvements",
+    "about": "About Us",
+    "admin": "Admin",
+    "dashboard":"Dashboard",
+    "faq": "FAQ"
+  },
+  "login": {
+    "title": "Welcome back!",
+    "register-text": "Do not have an account yet?",
+    "register-button": "Create account",
+    "email-term": "Email",
+    "password-term": "Password",
+    "password-placeholder": "Your Password",
+    "forgot-password-button": "Forgot password?",
+    "login-button": "Sign in"
+  }
+}

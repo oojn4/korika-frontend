@@ -1,0 +1,37 @@
+{
+  "app-name": "Climate Smart Indonesia",
+  "header": {
+    "home": "Beranda",
+    "articles": "Artikel",
+    "users": "Anggota",
+    "courses": "Pengembangan",
+    "about": "Tentang Kami",
+    "admin": "Admin",
+    "faq": "Tanya Jawab"
+  },
+  "login": {
+    "title": "Selamat Datang Kembali!",
+    "register-text": "Belum punya akun?",
+    "register-button": "Buat Akun",
+    "email-term": "Email",
+    "password-term": "Kata Sandi",
+    "password-placeholder": "Kata sandimu",
+    "forgot-password-button": "Lupa kata sandi?",
+    "login-button": "Masuk"
+  },
+    "register": {
+      "title": "Selamat Datang Kembali!",
+      "login-text": "Sudah punya akun?",
+      "email-term": "Email",
+      "password-term": "Kata Sandi",
+      "password-placeholder": "Kata sandimu",
+      "forgot-password-button": "Lupa kata sandi?",
+      "login-button": "Masuk",
+      "full-name": "Nama Lengkap",
+      "phone-number": "Nomor Telepon",
+      "address-1": "Alamat Baris 1",
+      "address-2": "Alamat Baris 2",
+      "already-account": "Sudah memiliki akun?",
+      "register-button": "Daftar"
+    }
+}
