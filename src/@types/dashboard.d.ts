@@ -168,5 +168,5 @@ export interface AggregateDataResponse {
 
 export interface ProvincesResponse {
   success: boolean
-  data: String[]
+  data: string[]
 }

@@ -170,17 +170,18 @@ const DashboardPage = () => {
   
       const monthYearTemp = maxItem ? `${maxItem.month.toString()}-${maxItem.year.toString()}` : '';
       setMonthYear(monthYearTemp);
-  
+      console.log("maxitem")
+      console.log(maxItem)
       if (maxItem) {
         // Filter predicted data untuk bulan berikutnya
         const nextMonth = maxItem.month === 12 ? 1 : maxItem.month + 1;
         const nextYear = maxItem.month === 12 ? maxItem.year + 1 : maxItem.year;
         const nextMonthPredictedData = aggregateData.filter(
-          (item) => item.status === 'predicted' && item.year === nextYear && item.month === nextMonth
+          (item) => item.status === 'predicted' && item?.year === nextYear && item?.month === nextMonth
         );
         console.log("data bulan selanjutnya (predicted)")
         console.log(nextMonthPredictedData)
-        const predictedMonthYearTemp = nextMonthPredictedData ? `${nextMonthPredictedData[0].month.toString()}-${nextMonthPredictedData[0].year.toString()}` : '';
+        const predictedMonthYearTemp = nextMonthPredictedData ? `${nextMonthPredictedData[0]?.month.toString()}-${nextMonthPredictedData[0]?.year.toString()}` : '';
         setPredictedMonthYear(predictedMonthYearTemp);
   
 

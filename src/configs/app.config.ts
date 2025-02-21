@@ -12,10 +12,10 @@ export type AppConfig = {
 const appConfig: AppConfig = {
   appName: 'Climate Smart Indonesia',
   locale: 'en',
-  baseUrl: 'http://202.43.168.207:3000',
+  baseUrl: 'http://localhost:3000',
   authSecret: 'IAADLu2Qu+xC4kteZfSUNOi5s/M6zSi7Z6tP85h4GBY=',
   authJwtAge: 1209600,
-  backendApiUrl: 'http://202.43.168.207:5000',
+  backendApiUrl: 'http://localhost:5000',
   // backendApiKey: 'Yo5x0ZoGgqLOAZTJgDbIirbuNe2QBhnqVHnIOQT3JtxwMWDlJU1qDbmskAcpNMpg',
   persistKey: 'root'
 }
