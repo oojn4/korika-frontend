@@ -160,7 +160,7 @@ const UploadActualData: React.FC = () => {
       
       <Dropzone
         onDrop={handleDrop}
-        onReject={(files) => {
+        onReject={() => {
           notifications.show({
             title: 'File rejected',
             message: 'Only Excel files (.xlsx, .xls) are allowed',

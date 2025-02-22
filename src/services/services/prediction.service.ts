@@ -21,23 +21,31 @@ export interface Prediction {
   tahun: number;
   bulan: number;
   id_faskes: number;
+  konfirmasi_lab_pcr: number;
   konfirmasi_lab_mikroskop: number;
   konfirmasi_lab_rdt: number;
-  prop_kab_pos_0_4: number;
-  prop_kab_pos_5_14: number;
-  prop_kab_pos_15_64: number;
-  prop_kab_pos_diatas_64: number;
-  prop_kab_kematian_malaria: number;
-  prop_kab_hamil_pos: number;
-  prop_kec_pos_0_4: number;
-  prop_kec_pos_5_14: number;
-  prop_kec_pos_15_64: number;
-  prop_kec_pos_diatas_64: number;
-  prop_kec_kematian_malaria: number;
-  prop_kec_hamil_pos: number;
+  total_konfirmasi_lab: number;
+  tot_pos: number;
+  pos_5_14: number;
+  pos_15_64: number;
+  pos_diatas_64: number;
+  kematian_malaria: number;
+  hamil_pos: number;
   obat_standar: number;
   obat_nonprogram: number;
   obat_primaquin: number;
+  p_pf: number;
+  p_pv: number;
+  p_po: number;
+  p_pm: number;
+  p_pk: number;
+  p_mix: number;
+  p_suspek_pk: number;
+  kasus_pe: number;
+  penularan_indigenus: number;
+  penularan_impor: number;
+  penularan_induced: number;
+  relaps: number;
 }
 
 export interface PredictionResponse {
@@ -51,6 +59,17 @@ export interface PredictionResponse {
 export interface TrainModelResponse {
   success: boolean;
   message: string;
+}
+
+export interface PredictAllResponse {
+  success: boolean;
+  total_facilities: number;
+  successful_predictions: number;
+  failed_predictions: number;
+  failed_facilities: number[];
+  summary_filename: string;
+  predictions: Prediction[];
+  message?: string;
 }
 
 const baseUrl = `${appConfig.backendApiUrl}`;
@@ -87,6 +106,16 @@ export const PredictionService = {
       url: `${baseUrl}/predict`,
       method: 'POST',
       data: { facility_id: facilityId },
+    });
+    
+    return res.data;
+  },
+  
+  // Predict all facilities
+  async predictAllFacilities(): Promise<PredictAllResponse> {
+    const res = await ApiService.fetchData<undefined, PredictAllResponse>({
+      url: `${baseUrl}/predict-all`,
+      method: 'POST',
     });
     
     return res.data;
