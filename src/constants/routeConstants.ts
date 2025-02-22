@@ -18,16 +18,28 @@ export const ADMINROUTES: Routes = [
     element: lazy(() => import('../pages/Admin/Admin')),
   },
   {
+    key: 'user-management',
+    name: 'User Management',
+    path: '/user-management',
+    element: lazy(() => import('../pages/Admin/UserManagement')),
+  },
+  {
+    key: 'health-facility-management',
+    name: 'Health Facility Management',
+    path: '/health-facility-management',
+    element: lazy(() => import('../pages/Admin/HealthFacilityManagement')),
+  },
+  {
+    key: 'mhfm-management',
+    name: 'Malaria Health Facility Monthly Management',
+    path: '/mhfm-management',
+    element: lazy(() => import('../pages/Admin/MHFMManagement')),
+  },
+  {
     key: 'upload-data',
     name: 'Upload Actual Data',
     path: '/upload-data',
     element: lazy(() => import('../pages/Admin/UploadData')),
-  },
-  {
-    key: 'raw-data',
-    name: 'Raw Data',
-    path: '/raw-data',
-    element: lazy(() => import('../pages/Admin/RawData')),
   },
   {
     key: 'training-model',
