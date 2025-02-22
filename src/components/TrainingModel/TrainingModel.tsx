@@ -20,13 +20,10 @@ import {
 } from '@mantine/core';
 import { IconBrain, IconChartLine, IconSearch } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
-import { DashboardService } from '../../services/services/dashboard.service';
 import { Prediction, PredictionService } from '../../services/services/prediction.service';
   
 const TrainingModel = () => {
   // State variables for provinces and UI state
-  const [provinces, setProvinces] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
   const [trainingLoading, setTrainingLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -34,7 +31,6 @@ const TrainingModel = () => {
   const [predictAllLoading, setPredictAllLoading] = useState(false);
   const [predictions, setPredictions] = useState<Prediction[] | null>(null);
   const [filteredPredictions, setFilteredPredictions] = useState<Prediction[] | null>(null);
-  const [summaryFilename, setSummaryFilename] = useState<string | null>(null);
   const [predictAllSummary, setPredictAllSummary] = useState<{
     total_facilities?: number;
     successful_predictions?: number;
@@ -50,20 +46,7 @@ const TrainingModel = () => {
   const [resultTabValue, setResultTabValue] = useState('main');
 
   // Fetch provinces on component mount
-  useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        const response = await DashboardService.fetchProvinces();
-        if (response.success) {
-          setProvinces(response.data);
-        }
-      } catch (error: any) {
-        setError('Error fetching provinces: ' + (error.response?.data?.error || error.message));
-      }
-    };
-    
-    fetchProvinces();
-  }, []);
+
 
   // Filter predictions when search query or facility filter changes
   useEffect(() => {
@@ -111,34 +94,12 @@ const TrainingModel = () => {
       setTrainingLoading(false);
     }
   };
-
-  // Download summary
-  const handleDownloadSummary = async () => {
-    if (!summaryFilename) return;
-    
-    try {
-      const blob = await PredictionService.downloadPrediction(summaryFilename);
-      
-      // Create a download link
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', summaryFilename);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (error: any) {
-      setError('Error downloading summary: ' + error.message);
-    }
-  };
-
   // Make predictions for all facilities
   const handlePredictAll = async () => {
     try {
       setPredictAllLoading(true);
       setError(null);
       setPredictAllSummary(null);
-      setSummaryFilename(null);
       setPredictions(null);
       setFilteredPredictions(null);
       setSearchQuery('');
@@ -153,7 +114,6 @@ const TrainingModel = () => {
           failed_predictions: response.failed_predictions,
           failed_facilities: response.failed_facilities
         });
-        setSummaryFilename(response.summary_filename);
         if (response.predictions && response.predictions.length > 0) {
           setPredictions(response.predictions);
           setFilteredPredictions(response.predictions);

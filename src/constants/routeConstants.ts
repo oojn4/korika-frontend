@@ -19,7 +19,7 @@ export const ADMINROUTES: Routes = [
   },
   {
     key: 'upload-data',
-    name: 'Upload Data',
+    name: 'Upload Actual Data',
     path: '/upload-data',
     element: lazy(() => import('../pages/Admin/UploadData')),
   },
@@ -30,14 +30,8 @@ export const ADMINROUTES: Routes = [
     element: lazy(() => import('../pages/Admin/RawData')),
   },
   {
-    key: 'predict-data',
-    name: 'Predict Data',
-    path: '/predict-data',
-    element: lazy(() => import('../pages/Admin/PredictData')),
-  },
-  {
     key: 'training-model',
-    name: 'Training Model',
+    name: 'Create Prediction Data',
     path: '/training-model',
     element: lazy(() => import('../pages/Admin/TrainingModel')),
   },
