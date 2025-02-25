@@ -7,7 +7,7 @@ import deepParseJson from '../utils/deepParseJson';
 const unauthorizedCode = [401];
 
 const BaseService = axios.create({
-  timeout: 60000,
+  timeout: 10000000,
   baseURL: appConfig.backendApiUrl,
 });
 

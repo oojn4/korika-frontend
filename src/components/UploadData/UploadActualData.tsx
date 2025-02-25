@@ -50,7 +50,6 @@ const UploadActualData: React.FC = () => {
           
           // Convert to JSON
           const excelData = XLSX.utils.sheet_to_json<MalariaDataRow>(worksheet);
-          
           // Validate required columns
           const requiredColumns = ['id_faskes', 'bulan', 'tahun', 'provinsi', 'kabupaten', 'kecamatan'];
           const firstRow = excelData[0] || {};
