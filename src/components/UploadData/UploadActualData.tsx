@@ -60,6 +60,7 @@ const UploadActualData: React.FC = () => {
           }
           
           // Process the data on frontend and send to backend
+          console.log(excelData)
           const response = await UploadService.uploadMalariaData(excelData);
           
           setResult(response.result);
