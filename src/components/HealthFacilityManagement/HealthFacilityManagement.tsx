@@ -10,6 +10,7 @@ import {
     Menu,
     Modal,
     Notification,
+    NumberInput,
     Pagination,
     Select,
     Stack,
@@ -26,7 +27,7 @@ import {
     IconTrash
 } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react';
-import { HealthFacilityService } from '../../services/services/healthfacility.service';
+import { HealthFacilityService, FacilityQueryParams, HealthFacilityMetadata } from '../../services/services/healthfacility.service';
 
 // Define types
 interface HealthFacility {
@@ -37,6 +38,11 @@ interface HealthFacility {
   kabupaten: string;
   kecamatan: string;
   address?: string;
+  lat:number;
+  lon:number;
+  url:string;
+  owner:string;
+
 }
 
 interface LocationFilter {
@@ -52,6 +58,10 @@ interface FacilityFormData {
   kabupaten: string;
   kecamatan: string;
   address?: string;
+  lat:number;
+  lon:number;
+  url:string;
+  owner:string;
 }
 
 interface NotificationState {
@@ -62,13 +72,11 @@ interface NotificationState {
 
 export const HealthFacilityManagement: React.FC = () => {
   const [facilities, setFacilities] = useState<HealthFacility[]>([]);
-  const [filteredFacilities, setFilteredFacilities] = useState<HealthFacility[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [currentFacility, setCurrentFacility] = useState<HealthFacility | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState<NotificationState>({ show: false, message: '', type: 'success' });
-  const [activePage, setActivePage] = useState<number>(1);
   const [opened, { open, close }] = useDisclosure(false);
   const [filterOpen, { toggle: toggleFilter }] = useDisclosure(false);
   const [locationFilter, setLocationFilter] = useState<LocationFilter>({
@@ -77,8 +85,13 @@ export const HealthFacilityManagement: React.FC = () => {
     kecamatan: ''
   });
   const [facilityTypeFilter, setFacilityTypeFilter] = useState<string>('');
-  const itemsPerPage = 10;
-
+  const [paginationMeta, setPaginationMeta] = useState<HealthFacilityMetadata | null>(null);
+  const [filters, setFilters] = useState<FacilityQueryParams>({
+    page: 1,
+    per_page: 10,
+    sort_by: 'id_faskes',
+    sort_order: 'asc'
+  });
   // Form data for creating/updating facilities
   const [formData, setFormData] = useState<FacilityFormData>({
     nama_faskes: '',
@@ -87,63 +100,36 @@ export const HealthFacilityManagement: React.FC = () => {
     kabupaten: '',
     kecamatan: '',
     address: '',
+    lat:0,
+    lon:0,
+    url:'',
+    owner:''
   });
 
   // Load facilities on component mount
   useEffect(() => {
-    fetchFacilities();
-  }, []);
+    const handler = setTimeout(() => {
+      setFilters((prev: any) => ({
+        ...prev,
+        nama_faskes: searchTerm,
+        page: 1 // Reset halaman saat pencarian berubah
+      }));
+    }, 500);
+    
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
-  // Filter facilities based on search term and filters
   useEffect(() => {
-    let result = facilities;
-    
-    // Apply search term filter
-    if (searchTerm) {
-      result = result.filter(facility => 
-        facility.nama_faskes?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        facility.address?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    
-    // Apply location filters
-    if (locationFilter.provinsi) {
-      result = result.filter(facility => 
-        facility.provinsi?.toLowerCase() === locationFilter.provinsi.toLowerCase()
-      );
-    }
-    
-    if (locationFilter.kabupaten) {
-      result = result.filter(facility => 
-        facility.kabupaten?.toLowerCase() === locationFilter.kabupaten.toLowerCase()
-      );
-    }
-    
-    if (locationFilter.kecamatan) {
-      result = result.filter(facility => 
-        facility.kecamatan?.toLowerCase() === locationFilter.kecamatan.toLowerCase()
-      );
-    }
-    
-    // Apply facility type filter
-    if (facilityTypeFilter) {
-      result = result.filter(facility => 
-        facility.tipe_faskes === facilityTypeFilter
-      );
-    }
-    
-    setFilteredFacilities(result);
-  }, [searchTerm, facilities, locationFilter, facilityTypeFilter]);
-
-  // Fetch facilities from API
+    fetchFacilities();
+  }, [filters]);
   const fetchFacilities = async (): Promise<void> => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await HealthFacilityService.getAllFacilities();
+      const response = await HealthFacilityService.getPaginatedFacilities(filters);
       if (response.success) {
         setFacilities(response.data);
-        setFilteredFacilities(response.data);
+        setPaginationMeta(response.meta);
       } else {
         setError(response.error || 'Failed to load facilities');
       }
@@ -153,19 +139,21 @@ export const HealthFacilityManagement: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Handle form input change
+  };  // Handle form input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
+     
     setFormData({ ...formData, [name]: value });
+    
   };
 
   // Handle select change
   const handleSelectChange = (name: string, value: string | null): void => {
     setFormData({ ...formData, [name]: value || '' });
   };
-
+const handleNumberChange = (name: keyof HealthFacility, value: number | undefined): void => {
+    setFormData({ ...formData, [name]: value || 0 });
+  };
   // Open modal for creating a new facility
   const handleAddFacility = (): void => {
     setCurrentFacility(null);
@@ -176,8 +164,39 @@ export const HealthFacilityManagement: React.FC = () => {
       kabupaten: '',
       kecamatan: '',
       address: '',
+      lat:0,
+      lon:0,
+      url:'',
+      owner:''
     });
     open();
+  };
+  const handlePageChange = (page: number): void => {
+    setFilters((prev: any) => ({ ...prev, page }));
+  };
+  
+  const handleFilterChange = (key: keyof FacilityQueryParams, value: any): void => {
+    const newFilters = { ...filters };
+    
+    if (value === null || value === '') {
+      delete newFilters[key];
+    } else {
+      newFilters[key] = value;
+    }
+    
+    // Reset to first page when filter changes
+    newFilters.page = 1;
+    
+    setFilters(newFilters);
+  };
+  const resetFilters = (): void => {
+    setSearchTerm('');
+    setFilters({
+      page: 1,
+      per_page: 10,
+      sort_by: 'id_faskes',
+      sort_order: 'asc'
+    });
   };
 
   // Open modal for editing an existing facility
@@ -190,6 +209,10 @@ export const HealthFacilityManagement: React.FC = () => {
       kabupaten: facility.kabupaten || '',
       kecamatan: facility.kecamatan || '',
       address: facility.address || '',
+      lat:facility.lat || 0,
+      lon:facility.lon || 0,
+      url:facility.url || '',
+      owner:facility.owner || ''      
     });
     open();
   };
@@ -270,20 +293,10 @@ export const HealthFacilityManagement: React.FC = () => {
   }, [notification]);
 
   // Reset filters
-  const resetFilters = (): void => {
-    setLocationFilter({
-      provinsi: '',
-      kabupaten: '',
-      kecamatan: ''
-    });
-    setFacilityTypeFilter('');
-  };
+  
 
   // Calculate pagination
-  const paginatedFacilities = filteredFacilities.slice(
-    (activePage - 1) * itemsPerPage,
-    activePage * itemsPerPage
-  );
+  
 
   // Facility type badge color
   const getFacilityTypeColor = (type: string): string => {
@@ -358,80 +371,92 @@ export const HealthFacilityManagement: React.FC = () => {
         </Button>
       </Group>
 
-      {filterOpen && (
-        <Accordion mb="md">
-          <Accordion.Item value="filters">
-            <Accordion.Control>
-              <Text size="sm">Location and Type Filters</Text>
-            </Accordion.Control>
-            <Accordion.Panel>
-              <Stack>
-                <Group grow>
-                  <Select
-                    label="Province"
-                    placeholder="Filter by province"
-                    value={locationFilter.provinsi}
-                    onChange={(value) => setLocationFilter({
-                      ...locationFilter,
-                      provinsi: value || '',
-                      kabupaten: '',
-                      kecamatan: ''
-                    })}
-                    data={uniqueProvinces.map(p => ({ value: p, label: p }))}
-                    clearable
-                  />
-                  
-                  <Select
-                    label="District"
-                    placeholder="Filter by district"
-                    value={locationFilter.kabupaten}
-                    onChange={(value) => setLocationFilter({
-                      ...locationFilter,
-                      kabupaten: value || '',
-                      kecamatan: ''
-                    })}
-                    data={uniqueKabupatens.map(k => ({ value: k, label: k }))}
-                    disabled={!locationFilter.provinsi}
-                    clearable
-                  />
-                  
-                  <Select
-                    label="Sub-district"
-                    placeholder="Filter by sub-district"
-                    value={locationFilter.kecamatan}
-                    onChange={(value) => setLocationFilter({
-                      ...locationFilter,
-                      kecamatan: value || ''
-                    })}
-                    data={uniqueKecamatans.map(k => ({ value: k, label: k }))}
-                    disabled={!locationFilter.kabupaten}
-                    clearable
-                  />
-                </Group>
-                
-                <Group grow>
-                  <Select
-                    label="Facility Type"
-                    placeholder="Filter by facility type"
-                    value={facilityTypeFilter}
-                    onChange={(value) => setFacilityTypeFilter(value || '')}
-                    data={uniqueFacilityTypes.map(t => ({ value: t, label: t }))}
-                    clearable
-                  />
-                  
-                  <Box style={{ display: 'flex', alignItems: 'flex-end' }}>
-                    <Button variant="subtle" onClick={resetFilters}>
-                      Reset Filters
-                    </Button>
-                  </Box>
-                </Group>
-              </Stack>
-            </Accordion.Panel>
-          </Accordion.Item>
-        </Accordion>
-      )}
+      <Accordion mb="md">
+  <Accordion.Item value="filters">
+    <Accordion.Control>
+      <Text size="sm">Location and Type Filters</Text>
+    </Accordion.Control>
+    <Accordion.Panel>
+      <Stack>
+        <Group grow>
+          <Select
+            label="Province"
+            placeholder="Filter by province"
+            value={filters.provinsi || ''}
+            onChange={(value) => {
+              handleFilterChange('provinsi', value);
+              if (!value) {
+                // Clear dependent filters
+                handleFilterChange('kabupaten', null);
+                handleFilterChange('kecamatan', null);
+              }
+            }}
+            data={paginationMeta?.distinct_values.provinces.map((p: any) => ({ value: p, label: p })) || []}
+            clearable
+          />
+          
+          <Select
+            label="District"
+            placeholder="Filter by district"
+            value={filters.kabupaten || ''}
+            onChange={(value) => {
+              handleFilterChange('kabupaten', value);
+              if (!value) {
+                // Clear dependent filter
+                handleFilterChange('kecamatan', null);
+              }
+            }}
+            data={paginationMeta?.distinct_values.districts.map((k: any) => ({ value: k, label: k })) || []}
+            disabled={!filters.provinsi}
+            clearable
+          />
+          
+          <Select
+            label="Sub-district"
+            placeholder="Filter by sub-district"
+            value={filters.kecamatan || ''}
+            onChange={(value) => handleFilterChange('kecamatan', value)}
+            data={paginationMeta?.distinct_values.subdistricts.map((k: any) => ({ value: k, label: k })) || []}
+            disabled={!filters.kabupaten}
+            clearable
+          />
+        </Group>
+        
+        <Group grow>
+          <Select
+            label="Facility Type"
+            placeholder="Filter by facility type"
+            value={filters.tipe_faskes || ''}
+            onChange={(value) => handleFilterChange('tipe_faskes', value)}
+            data={paginationMeta?.distinct_values.facility_types.map((t: any) => ({ value: t, label: t })) || []}
+            clearable
+          />
+          
+          <Select
+            label="Items per page"
+            placeholder="Items per page"
+            value={filters.per_page?.toString()}
+            onChange={(value) => handleFilterChange('per_page', value ? parseInt(value) : 10)}
+            data={[
+              { value: '5', label: '5' },
+              { value: '10', label: '10' },
+              { value: '25', label: '25' },
+              { value: '50', label: '50' }
+            ]}
+          />
+          
+          <Box style={{ display: 'flex', alignItems: 'flex-end' }}>
+            <Button variant="subtle" onClick={resetFilters}>
+              Reset Filters
+            </Button>
+          </Box>
+        </Group>
+      </Stack>
+    </Accordion.Panel>
+  </Accordion.Item>
+</Accordion>
 
-      {isLoading && !paginatedFacilities.length ? (
+      {isLoading && !facilities.length ? (
         <Center p="xl">
           <Loader />
         </Center>
@@ -449,8 +474,8 @@ export const HealthFacilityManagement: React.FC = () => {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {paginatedFacilities.length > 0 ? (
-                paginatedFacilities.map((facility) => (
+              {facilities.length > 0 ? (
+                facilities.map((facility) => (
                   <Table.Tr key={facility.id_faskes}>
                     <Table.Td>{facility.nama_faskes}</Table.Td>
                     <Table.Td>
@@ -497,15 +522,18 @@ export const HealthFacilityManagement: React.FC = () => {
             </Table.Tbody>
           </Table>
 
-          {filteredFacilities.length > itemsPerPage && (
-            <Group mt="md">
-              <Pagination
-                value={activePage}
-                onChange={setActivePage}
-                total={Math.ceil(filteredFacilities.length / itemsPerPage)}
-              />
-            </Group>
-          )}
+          {paginationMeta && paginationMeta.total_pages > 1 && (
+  <Group mt="md" >
+    <Text size="sm">
+      Showing {facilities.length} of {paginationMeta.total_records} facilities
+    </Text>
+    <Pagination
+      value={paginationMeta.page}
+      onChange={handlePageChange}
+      total={paginationMeta.total_pages}
+    />
+  </Group>
+)}
         </>
       )}
 
@@ -535,7 +563,24 @@ export const HealthFacilityManagement: React.FC = () => {
             data={[
               { value: 'Rumah Sakit', label: 'Rumah Sakit' },
               { value: 'Puskesmas', label: 'Puskesmas' },
-              { value: 'Klinik', label: 'Klinik' }
+              { value: 'Klinik', label: 'Klinik' },
+              { value: 'Praktek Swasta', label: 'Praktek Swasta' },
+              { value: 'BP4/BBKPM/BKPM', label: 'BP4/BBKPM/BKPM' },
+              { value: 'RS TNI/Polri', label: 'RS TNI/Polri' },
+            ]}
+            required
+          />
+          <Select
+            label="Facility Owner"
+            placeholder="Select facility owner"
+            name="owner"
+            value={formData.owner}
+            onChange={(value) => handleSelectChange('owner', value)}
+            data={[
+              { value: 'PEMERINTAH', label: 'Pemerintah' },
+              { value: 'SWASTA', label: 'Swasta' },
+              { value: 'TNI', label: 'TNI' },
+              { value: 'POLRI', label: 'POLRI' }
             ]}
             required
           />
@@ -576,6 +621,23 @@ export const HealthFacilityManagement: React.FC = () => {
             value={formData.address}
             onChange={handleInputChange}
           />
+          <Group grow>
+              <NumberInput 
+              label="Latitude" 
+              placeholder="Enter latitude"
+              name="lat"
+              value={formData.lat}
+              onChange={(value) => handleNumberChange('lat', typeof value === 'number' ? value : undefined)}
+              />
+              <NumberInput
+              label="Longitude"
+              placeholder="Enter longitude"
+              name="lon"
+              value={formData.lon}
+              onChange={(value) => handleNumberChange('lon', typeof value === 'number' ? value : undefined)}
+              />
+            </Group>
+
           
           
           {error && <Text color="red" size="sm">{error}</Text>}

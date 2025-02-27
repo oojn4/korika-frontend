@@ -166,6 +166,7 @@ export const MHFMManagement: React.FC = () => {
   };
   useEffect(() => {
     fetchMalariaData();
+    fetchFacilities();
   }, [filters]);
 // Tambahkan useEffect ini untuk search
 useEffect(() => {

@@ -10,6 +10,7 @@ import {
   Modal,
   Notification,
   Pagination,
+  PasswordInput,
   Select,
   Stack,
   Table,
@@ -17,20 +18,14 @@ import {
   TextInput
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconDotsVertical, IconEdit, IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconDotsVertical, IconEdit, IconFilter, IconPlus, IconTrash } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react';
-import { UserService } from '../../services/services/user.service';
-
-// Define types
-interface User {
-  id: number;
-  full_name: string;
-  email: string;
-  access_level: string;
-  id_faskes?: number | null;
-}
-
-
+import { 
+  UserService, 
+  User, 
+  UserMetadata, 
+  UserQueryParams
+} from '../../services/services/user.service';
 
 interface FormData {
   full_name: string;
@@ -47,15 +42,27 @@ interface NotificationState {
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [paginationMeta, setPaginationMeta] = useState<UserMetadata | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchTimeout, setSearchTimeout] = useState<any | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [notification, setNotification] = useState<NotificationState>({ show: false, message: '', type: 'success' });
-  const [activePage, setActivePage] = useState<number>(1);
+  const [notification, setNotification] = useState<NotificationState>({ 
+    show: false, 
+    message: '', 
+    type: 'success' 
+  });
   const [opened, { open, close }] = useDisclosure(false);
-  const itemsPerPage = 10;
+  const [filterOpened, { toggle: toggleFilter }] = useDisclosure(false);
+  
+  // Query params for server-side filtering and pagination
+  const [filters, setFilters] = useState<UserQueryParams>({
+    page: 1,
+    per_page: 10,
+    sort_by: 'id',
+    sort_order: 'asc'
+  });
 
   // Form data for creating/updating users
   const [formData, setFormData] = useState<FormData>({
@@ -65,38 +72,47 @@ const UserManagement: React.FC = () => {
     password: ''
   });
 
-  // Load users and facilities on component mount
+  // Load users on component mount
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [filters]);
 
-  // Filter users based on search term
+  // Handle search with debounce
   useEffect(() => {
-    if (searchTerm) {
-      setFilteredUsers(users.filter(user => 
-        user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-      ));
-    } else {
-      setFilteredUsers(users);
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
     }
-  }, [searchTerm, users]);
 
-  // Mock API functions (replace with actual API calls)
+    const timeout = setTimeout(() => {
+      setFilters({
+        ...filters,
+        full_name: searchTerm,
+        page: 1 // Reset to first page on new search
+      });
+    }, 500);
+
+    setSearchTimeout(timeout);
+
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
+  }, [searchTerm]);
+
+  // Fetch users with pagination and filters
   const fetchUsers = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Replace with actual API call
-      const response = await UserService.getAllUsers();
-    //   const mockUsers: User[] = [
-    //     { id: 1, name: 'Admin User', email: 'admin@example.com', access_level: 'admin' },
-    //     { id: 2, name: 'Manager User', email: 'manager@example.com', access_level: 'manager', id_faskes: 1 },
-    //     { id: 3, name: 'Staff User', email: 'staff@example.com', access_level: 'staff', id_faskes: 2 }
-    //   ];
+      const response = await UserService.getPaginatedUsers(filters);
       
-      setUsers(response.data);
-      setFilteredUsers(response.data);
+      if (response.success) {
+        setUsers(response.data);
+        setPaginationMeta(response.meta);
+      } else {
+        setError(response.error || 'Failed to load users');
+      }
     } catch (err) {
       console.error('Error fetching users:', err);
       setError('Failed to load users. Please try again later.');
@@ -105,7 +121,40 @@ const UserManagement: React.FC = () => {
     }
   };
 
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setFilters({
+      ...filters,
+      page
+    });
+  };
 
+  // Handle filter changes
+  const handleFilterChange = (key: keyof UserQueryParams, value: any) => {
+    const newFilters = { ...filters };
+    
+    if (value === null || value === '') {
+      delete newFilters[key];
+    } else {
+      newFilters[key] = value;
+    }
+    
+    // Reset to first page when filters change
+    newFilters.page = 1;
+    
+    setFilters(newFilters);
+  };
+
+  // Reset filters
+  const resetFilters = () => {
+    setSearchTerm('');
+    setFilters({
+      page: 1,
+      per_page: 10,
+      sort_by: 'id',
+      sort_order: 'asc'
+    });
+  };
 
   // Handle form input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,27 +198,23 @@ const UserManagement: React.FC = () => {
     setError(null);
 
     try {
-      // Mock API call (replace with actual API call)
       if (currentUser) {
         await UserService.updateUser(currentUser.id, formData);
       } else {
         await UserService.createUser(formData);
       }
 
-      // Simulate API success
-      setTimeout(() => {
-        setNotification({
-          show: true,
-          message: currentUser ? 'User updated successfully!' : 'User created successfully!',
-          type: 'success'
-        });
-        fetchUsers();
-        close();
-        setIsLoading(false);
-      }, 1000);
+      setNotification({
+        show: true,
+        message: currentUser ? 'User updated successfully!' : 'User created successfully!',
+        type: 'success'
+      });
+      fetchUsers();
+      close();
     } catch (err) {
       console.error('Error:', err);
       setError('Operation failed. Please try again.');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -180,22 +225,22 @@ const UserManagement: React.FC = () => {
     
     setIsLoading(true);
     try {
-      // Mock API call (replace with actual API call)
-      await UserService.deleteUser(userId);
+      const response = await UserService.deleteUser(userId);
       
-      // Simulate API success
-      setTimeout(() => {
+      if (response.success) {
         setNotification({
           show: true,
           message: 'User deleted successfully!',
           type: 'success'
         });
         fetchUsers();
-        setIsLoading(false);
-      }, 1000);
+      } else {
+        setError(response.error || 'Failed to delete user');
+      }
     } catch (err) {
       console.error('Error deleting user:', err);
       setError('Failed to delete user. Please try again later.');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -210,12 +255,6 @@ const UserManagement: React.FC = () => {
     }
   }, [notification]);
 
-  // Calculate pagination
-  const paginatedUsers = filteredUsers.slice(
-    (activePage - 1) * itemsPerPage,
-    activePage * itemsPerPage
-  );
-
   // Access level badge color
   const getAccessLevelColor = (level: string): string => {
     switch(level) {
@@ -227,12 +266,13 @@ const UserManagement: React.FC = () => {
   return (
     <div>
       <Group mb="md">
-        <Button 
+        <Text size="xl" style={{weight:500}}>User Management</Text>
+        {/* <Button 
           leftSection={<IconPlus size={16} />} 
           onClick={handleAddUser}
         >
           Add User
-        </Button>
+        </Button> */}
       </Group>
 
       {notification.show && (
@@ -245,14 +285,71 @@ const UserManagement: React.FC = () => {
         </Notification>
       )}
 
-      <TextInput
-        placeholder="Search users..."
-        mb="md"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.currentTarget.value)}
-      />
+      <Group mb="md">
+        <TextInput
+          placeholder="Search users by name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.currentTarget.value)}
+          style={{ flex: 1 }}
+          autoComplete="off"
+        />
+        <Button
+          variant="outline"
+          leftSection={<IconFilter size={16} />}
+          onClick={toggleFilter}
+        >
+          Filters
+        </Button>
+      </Group>
 
-      {isLoading && !paginatedUsers.length ? (
+      {filterOpened && (
+        <Stack mb="md" p="md" style={{ border: '1px solid #eee', borderRadius: '8px' }}>
+          <Group grow>
+            <TextInput
+              label="Email"
+              placeholder="Filter by email"
+              value={filters.email || ''}
+              onChange={(e) => handleFilterChange('email', e.currentTarget.value)}
+            />
+            
+            <Select
+              label="Access Level"
+              placeholder="Filter by access level"
+              value={filters.access_level || ''}
+              onChange={(value) => handleFilterChange('access_level', value)}
+              data={paginationMeta?.distinct_values.access_levels.map(level => ({ 
+                value: level, 
+                label: level 
+              })) || [
+                { value: 'admin', label: 'Admin' },
+                { value: 'user', label: 'User' },
+              ]}
+              clearable
+            />
+            
+            <Select
+              label="Items per page"
+              placeholder="Items per page"
+              value={filters.per_page?.toString()}
+              onChange={(value) => handleFilterChange('per_page', value ? parseInt(value) : 10)}
+              data={[
+                { value: '5', label: '5' },
+                { value: '10', label: '10' },
+                { value: '25', label: '25' },
+                { value: '50', label: '50' }
+              ]}
+            />
+          </Group>
+          
+          <Group >
+            <Button variant="subtle" onClick={resetFilters}>
+              Reset Filters
+            </Button>
+          </Group>
+        </Stack>
+      )}
+
+      {isLoading && !users.length ? (
         <Center p="xl">
           <Loader />
         </Center>
@@ -270,8 +367,8 @@ const UserManagement: React.FC = () => {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {paginatedUsers.length > 0 ? (
-                paginatedUsers.map((user) => (
+              {users.length > 0 ? (
+                users.map((user) => (
                   <Table.Tr key={user.id}>
                     <Table.Td>{user.full_name}</Table.Td>
                     <Table.Td>{user.email}</Table.Td>
@@ -316,12 +413,15 @@ const UserManagement: React.FC = () => {
             </Table.Tbody>
           </Table>
 
-          {filteredUsers.length > itemsPerPage && (
-            <Group mt="md">
+          {paginationMeta && paginationMeta.total_pages > 1 && (
+            <Group mt="md" >
+              <Text size="sm">
+                Showing {users.length} of {paginationMeta.total_records} users
+              </Text>
               <Pagination
-                value={activePage}
-                onChange={setActivePage}
-                total={Math.ceil(filteredUsers.length / itemsPerPage)}
+                value={paginationMeta.page}
+                onChange={handlePageChange}
+                total={paginationMeta.total_pages}
               />
             </Group>
           )}
@@ -366,7 +466,7 @@ const UserManagement: React.FC = () => {
             required
           />
           
-          <TextInput
+          <PasswordInput
             label="Password"
             placeholder={currentUser ? "Leave blank to keep current password" : "Enter password"}
             type="password"
@@ -374,6 +474,7 @@ const UserManagement: React.FC = () => {
             value={formData.password}
             onChange={handleInputChange}
             required={!currentUser}
+            autoComplete="new-password"
           />
           
           
@@ -390,6 +491,5 @@ const UserManagement: React.FC = () => {
     </div>
   );
 };
-
 
 export default UserManagement;
