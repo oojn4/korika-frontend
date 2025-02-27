@@ -34,7 +34,7 @@ import {
 } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react';
 import { HealthFacilityService } from '../../services/services/healthfacility.service';
-import { CreateMalariaData, MalariaDataService, MalariaMonthlyData } from '../../services/services/mhfm.service';
+import { CreateMalariaData, MalariaDataService, MalariaMonthlyData, PaginationMeta, QueryParams } from '../../services/services/mhfm.service';
 
 // Define types
 interface HealthFacility {
@@ -56,8 +56,6 @@ interface NotificationState {
 export const MHFMManagement: React.FC = () => {
   // State for malaria data
   const [malariaData, setMalariaData] = useState<MalariaMonthlyData[]>([]);
-  const [filteredData, setFilteredData] = useState<MalariaMonthlyData[]>([]);
-  const [paginatedData, setPaginatedData] = useState<MalariaMonthlyData[]>([]);
   const [facilities, setFacilities] = useState<HealthFacility[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [currentData, setCurrentData] = useState<MalariaMonthlyData | null>(null);
@@ -75,13 +73,15 @@ export const MHFMManagement: React.FC = () => {
   const [activeStep, setActiveStep] = useState<number>(0);
   
   // Filter states
-  const [facilityFilter, setFacilityFilter] = useState<number | null>(null);
-  const [dateFilter, setDateFilter] = useState<DateFilter>({
-    tahun: new Date().getFullYear(),
-    bulan: null
+  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
+  const [searchFacilityId, setSearchFacilityId] = useState<number | null>(null);
+  const [filters, setFilters] = useState<QueryParams>({
+    sort_by: 'id_mhfm',
+    sort_order: 'desc',
+    page: 1,
+    per_page: 10,
+    status: 'actual' // Default status
   });
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
-
   // Pagination
   const itemsPerPage = 10;
 
@@ -128,66 +128,20 @@ export const MHFMManagement: React.FC = () => {
     pop_penduduk_kab: 0
   });
 
-  // Load data and facilities on component mount
-  useEffect(() => {
-    fetchMalariaData();
-    fetchFacilities();
-  }, []);
-
-  // Filter data based on search term and filters
-  useEffect(() => {
-    let result = malariaData;
-    
-    // Apply search using facility name or ID
-    if (searchTerm) {
-      const facilityMatch = facilities.find(f => 
-        f.nama_faskes.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      
-      if (facilityMatch) {
-        result = result.filter(data => data.id_faskes === facilityMatch.id_faskes);
-      } else if (!isNaN(parseInt(searchTerm))) {
-        // Try to filter by ID if search term is a number
-        result = result.filter(data => 
-          data.id_mhfm === parseInt(searchTerm) ||
-          data.id_faskes === parseInt(searchTerm)
-        );
-      }
-    }
-    
-    // Apply facility filter
-    if (facilityFilter) {
-      result = result.filter(data => data.id_faskes === facilityFilter);
-    }
-    
-    // Apply year filter
-    if (dateFilter.tahun) {
-      result = result.filter(data => data.tahun === dateFilter.tahun);
-    }
-    
-    // Apply month filter
-    if (dateFilter.bulan) {
-      result = result.filter(data => data.bulan === dateFilter.bulan);
-    }
-    
-    // Apply status filter
-    if (statusFilter) {
-      result = result.filter(data => data.status === statusFilter);
-    }
-    
-    setFilteredData(result);
-  }, [searchTerm, malariaData, facilityFilter, dateFilter, statusFilter, facilities]);
-
+  // // Load data and facilities on component mount
+  // useEffect(() => {
+  //   fetchMalariaData();
+  //   fetchFacilities();
+  // }, []);
   // Fetch monthly data from API
   const fetchMalariaData = async (): Promise<void> => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await MalariaDataService.getAllMalariaData();
+      const response = await MalariaDataService.getPaginatedMalariaData(filters);
       if (response.success) {
         setMalariaData(response.data);
-        setFilteredData(response.data);
-        setPaginatedData(response.data);
+        setPaginationMeta(response.meta);
       } else {
         setError(response.error || 'Failed to load malaria data');
       }
@@ -210,7 +164,67 @@ export const MHFMManagement: React.FC = () => {
       console.error('Error fetching facilities:', err);
     }
   };
-
+  useEffect(() => {
+    fetchMalariaData();
+  }, [filters]);
+// Tambahkan useEffect ini untuk search
+useEffect(() => {
+  // Apply search using facility name when the user types
+  if (searchTerm) {
+    const facilityMatch = facilities.find(f => 
+      f.nama_faskes.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    
+    if (facilityMatch) {
+      setSearchFacilityId(facilityMatch.id_faskes);
+    } else {
+      setSearchFacilityId(null);
+    }
+  } else {
+    setSearchFacilityId(null);
+  }
+}, [searchTerm, facilities]);
+useEffect(() => {
+  const handler = setTimeout(() => {
+    const newFilters = { ...filters };
+    
+    // Update id_faskes filter based on search
+    if (searchFacilityId) {
+      newFilters.id_faskes = searchFacilityId;
+    } else {
+      delete newFilters.id_faskes;
+    }
+    
+    // Reset to first page when searching
+    newFilters.page = 1;
+    
+    setFilters(newFilters);
+  }, 500);
+  
+  return () => clearTimeout(handler);
+}, [searchFacilityId]);
+const handlePageChange = (page: number): void => {
+  setFilters({ ...filters, page });
+};
+const handleFilterChange = (key: keyof QueryParams, value: any): void => {
+  const newFilters = { ...filters };
+  
+  if (value === null || value === '') {
+    if (key === 'status') {
+      // Default to 'actual' if status is cleared
+      newFilters[key] = 'actual';
+    } else {
+      delete newFilters[key];
+    }
+  } else {
+    newFilters[key] = value;
+  }
+  
+  // Reset to first page when filter changes
+  newFilters.page = 1;
+  
+  setFilters(newFilters);
+};
   // Handle number input change
   const handleNumberChange = (name: keyof CreateMalariaData, value: number | undefined): void => {
     setFormData({ ...formData, [name]: value || 0 });
@@ -369,12 +383,14 @@ export const MHFMManagement: React.FC = () => {
 
   // Reset filters
   const resetFilters = (): void => {
-    setFacilityFilter(null);
-    setDateFilter({
-      tahun: new Date().getFullYear(),
-      bulan: null
+    setFilters({
+      sort_by: 'id_mhfm',
+      sort_order: 'desc',
+      page: 1,
+      per_page: 10,
+      status: 'actual'
     });
-    setStatusFilter(null);
+    setSearchTerm('');
   };
 
   // Navigate stepper
@@ -406,7 +422,7 @@ export const MHFMManagement: React.FC = () => {
 
   // Generate year options (last 5 years)
   const currentYear = new Date().getFullYear();
-  const yearOptions = Array.from({ length: 5 }, (_, i) => {
+  const yearOptions = Array.from({ length: 7 }, (_, i) => {
     const year = currentYear - i;
     return { value: year.toString(), label: year.toString() };
   });
@@ -467,55 +483,80 @@ export const MHFMManagement: React.FC = () => {
       </Group>
 
       {filterOpened && (
-        <Paper shadow="xs" p="md" mb="md">
-          <Group align="end" grow>
-            <Select
-              label="Health Facility"
-              placeholder="Filter by facility"
-              value={facilityFilter?.toString()}
-              onChange={(value) => setFacilityFilter(value ? parseInt(value) : null)}
-              data={facilities.map(f => ({ value: f.id_faskes.toString(), label: f.nama_faskes }))}
-              clearable
-            />
-            
-            <Select
-              label="Year"
-              placeholder="Filter by year"
-              value={dateFilter.tahun?.toString()}
-              onChange={(value) => setDateFilter({ ...dateFilter, tahun: value ? parseInt(value) : null })}
-              data={yearOptions}
-              clearable
-            />
-            
-            <Select
-              label="Month"
-              placeholder="Filter by month"
-              value={dateFilter.bulan?.toString()}
-              onChange={(value) => setDateFilter({ ...dateFilter, bulan: value ? parseInt(value) : null })}
-              data={monthOptions}
-              clearable
-              disabled={!dateFilter.tahun}
-            />
-            
-            <Select
-              label="Status"
-              placeholder="Filter by status"
-              value={statusFilter}
-              onChange={setStatusFilter}
-              data={[
-                { value: 'actual', label: 'Actual' },
-                { value: 'predicted', label: 'Predicted' }
-              ]}
-              clearable
-            />
-            
-            <Button variant="subtle" onClick={resetFilters}>
-              Reset Filters
-            </Button>
-          </Group>
-        </Paper>
-      )}
-
+  <Paper shadow="xs" p="md" mb="md">
+    <Grid>
+      <Grid.Col span={4}>
+        <Select
+          label="Health Facility"
+          placeholder="Filter by facility"
+          value={filters.id_faskes?.toString()}
+          onChange={(value) => handleFilterChange('id_faskes', value ? parseInt(value) : null)}
+          data={facilities.map(f => ({ value: f.id_faskes.toString(), label: f.nama_faskes }))}
+          searchable
+          clearable
+        />
+      </Grid.Col>
+      
+      <Grid.Col span={4}>
+        <Select
+          label="Year"
+          placeholder="Filter by year"
+          value={filters.year?.toString()}
+          onChange={(value) => handleFilterChange('year', value ? parseInt(value) : null)}
+          data={yearOptions}
+          clearable
+        />
+      </Grid.Col>
+      
+      <Grid.Col span={4}>
+        <Select
+          label="Month"
+          placeholder="Filter by month"
+          value={filters.month?.toString()}
+          onChange={(value) => handleFilterChange('month', value ? parseInt(value) : null)}
+          data={monthOptions}
+          clearable
+        />
+      </Grid.Col>
+      
+      <Grid.Col span={4}>
+        <Select
+          label="Status"
+          placeholder="Filter by status"
+          value={filters.status}
+          onChange={(value) => handleFilterChange('status', value || 'actual')}
+          data={[
+            { value: 'actual', label: 'Actual' },
+            { value: 'predicted', label: 'Predicted' }
+          ]}
+        />
+      </Grid.Col>
+      
+      <Grid.Col span={4}>
+        <Select
+          label="Records per page"
+          placeholder="Records per page"
+          value={filters.per_page?.toString()}
+          onChange={(value) => handleFilterChange('per_page', value ? parseInt(value) : 10)}
+          data={[
+            { value: '5', label: '5' },
+            { value: '10', label: '10' },
+            { value: '25', label: '25' },
+            { value: '50', label: '50' }
+          ]}
+        />
+      </Grid.Col>
+      
+      <Grid.Col span={12}>
+        <Group>
+          <Button variant="subtle" onClick={resetFilters}>
+            Reset Filters
+          </Button>
+        </Group>
+      </Grid.Col>
+    </Grid>
+  </Paper>
+)}
       <Tabs value={activeTab} onChange={setActiveTab}>
         <Tabs.List>
           <Tabs.Tab value="malaria" leftSection={<IconVirus size={16} />}>
@@ -527,7 +568,7 @@ export const MHFMManagement: React.FC = () => {
         </Tabs.List>
 
         <Tabs.Panel value="malaria" pt="xs">
-          {isLoading && !paginatedData.length ? (
+          {isLoading && !malariaData.length ? (
             <Center p="xl">
               <Loader />
             </Center>
@@ -549,8 +590,8 @@ export const MHFMManagement: React.FC = () => {
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                  {paginatedData.length > 0 ? (
-                    paginatedData.map((data) => (
+                  {malariaData.length > 0 ? (
+                    malariaData.map((data) => (
                       <Table.Tr key={data.id_mhfm}>
                         <Table.Td>{data.id_mhfm}</Table.Td>
                         <Table.Td>
@@ -618,12 +659,12 @@ export const MHFMManagement: React.FC = () => {
                 </Table.Tbody>
               </Table>
 
-              {filteredData.length > itemsPerPage && (
+              {malariaData.length > itemsPerPage && (
                 <Group mt="md">
                   <Pagination
                     value={activePage}
                     onChange={setActivePage}
-                    total={Math.ceil(filteredData.length / itemsPerPage)}
+                    total={Math.ceil(malariaData.length / itemsPerPage)}
                   />
                 </Group>
               )}
@@ -631,7 +672,7 @@ export const MHFMManagement: React.FC = () => {
           )}
         </Tabs.Panel>
         <Tabs.Panel value="weather" pt="xs">
-            {isLoading && !paginatedData.length ? (
+            {isLoading && !malariaData.length ? (
                 <Center p="xl">
                 <Loader />
                 </Center>
@@ -653,8 +694,8 @@ export const MHFMManagement: React.FC = () => {
                     </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
-                    {paginatedData.length > 0 ? (
-                        paginatedData.map((data) => (
+                    {malariaData.length > 0 ? (
+                        malariaData.map((data) => (
                         <Table.Tr key={data.id_mhfm}>
                             <Table.Td>{data.id_mhfm}</Table.Td>
                             <Table.Td>
@@ -722,15 +763,24 @@ export const MHFMManagement: React.FC = () => {
             )}
             </Tabs.Panel>
       </Tabs>
-      {filteredData.length > itemsPerPage && (
-                    <Group mt="md">
-                      <Pagination
-                        value={activePage}
-                        onChange={setActivePage}
-                        total={Math.ceil(filteredData.length / itemsPerPage)}
-                      />
-                    </Group>
-        )}
+      {paginationMeta && paginationMeta.total_pages > 1 && (
+  <Group mt="md">
+    <Text size="sm">
+      Showing {malariaData.length} of {paginationMeta.total_records} records
+      {paginationMeta.month && paginationMeta.year && (
+        <> for {getMonthName(paginationMeta.month)} {paginationMeta.year}</>
+      )}
+      {paginationMeta.status && (
+        <> with status <Badge color={getStatusColor(paginationMeta.status)}>{paginationMeta.status}</Badge></>
+      )}
+    </Text>
+    <Pagination
+      value={paginationMeta.page}
+      onChange={handlePageChange}
+      total={paginationMeta.total_pages}
+    />
+  </Group>
+)}
 
       {/* Add/Edit Modal with Stepper */}
       <Modal

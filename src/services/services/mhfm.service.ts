@@ -53,9 +53,29 @@ export interface MalariaMonthlyData {
   pop_penduduk_kab: number | null;
 }
 
+export interface PaginationMeta {
+  page: number;
+  per_page: number;
+  total_pages: number;
+  total_records: number;
+  month: number;
+  year: number;
+  status: string;
+  has_next: boolean;
+  has_prev: boolean;
+  filters: Record<string, any>;
+}
+
 export interface MalariaDataResponse {
   success: boolean;
   data: MalariaMonthlyData[];
+  error?: string;
+}
+
+export interface PaginatedMalariaDataResponse {
+  success: boolean;
+  data: MalariaMonthlyData[];
+  meta: PaginationMeta;
   error?: string;
 }
 
@@ -154,13 +174,58 @@ export interface UpdateMalariaData {
   pop_penduduk_kab?: number;
 }
 
+export interface QueryParams {
+  page?: number;
+  per_page?: number;
+  month?: number;
+  year?: number;
+  status?: string;
+  sort_by?: string;
+  sort_order?: 'asc' | 'desc';
+  id_faskes?: number | string;
+  provinsi?: string;
+  kabupaten?: string;
+  kecamatan?: string;
+  tipe_faskes?: string;
+}
+
 const baseUrl = `${appConfig.backendApiUrl}`;
 
 export const MalariaDataService = {
-  // Get all malaria data
+  // Get all malaria data (legacy method)
   async getAllMalariaData(): Promise<MalariaDataResponse> {
     const res = await ApiService.fetchData<undefined, MalariaDataResponse>({
       url: `${baseUrl}/malaria`,
+      method: 'GET',
+    });
+    return res.data;
+  },
+
+  // Get paginated malaria data with filters
+  async getPaginatedMalariaData(params: QueryParams = {}): Promise<PaginatedMalariaDataResponse> {
+    // Build query parameters
+    const queryParams = new URLSearchParams();
+    
+    if (params.page) queryParams.append('page', params.page.toString());
+    if (params.per_page) queryParams.append('per_page', params.per_page.toString());
+    if (params.month) queryParams.append('month', params.month.toString());
+    if (params.year) queryParams.append('year', params.year.toString());
+    if (params.status) queryParams.append('status', params.status);
+    if (params.sort_by) queryParams.append('sort_by', params.sort_by);
+    if (params.sort_order) queryParams.append('sort_order', params.sort_order);
+    
+    // Add filter parameters
+    if (params.id_faskes) queryParams.append('id_faskes', params.id_faskes.toString());
+    if (params.provinsi) queryParams.append('provinsi', params.provinsi);
+    if (params.kabupaten) queryParams.append('kabupaten', params.kabupaten);
+    if (params.kecamatan) queryParams.append('kecamatan', params.kecamatan);
+    if (params.tipe_faskes) queryParams.append('tipe_faskes', params.tipe_faskes);
+    
+    const queryString = queryParams.toString();
+    const url = `${baseUrl}/malaria/paginated${queryString ? `?${queryString}` : ''}`;
+    
+    const res = await ApiService.fetchData<undefined, PaginatedMalariaDataResponse>({
+      url,
       method: 'GET',
     });
     return res.data;
@@ -221,6 +286,4 @@ export const MalariaDataService = {
     });
     return res.data;
   },
-  
-
 };
