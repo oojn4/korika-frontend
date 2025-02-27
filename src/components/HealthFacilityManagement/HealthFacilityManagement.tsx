@@ -22,7 +22,6 @@ import { useDisclosure } from '@mantine/hooks';
 import {
     IconDotsVertical,
     IconEdit,
-    IconFilter,
     IconPlus,
     IconTrash
 } from '@tabler/icons-react';
@@ -45,11 +44,7 @@ interface HealthFacility {
 
 }
 
-interface LocationFilter {
-  provinsi: string;
-  kabupaten: string;
-  kecamatan: string;
-}
+
 
 interface FacilityFormData {
   nama_faskes: string;
@@ -78,13 +73,6 @@ export const HealthFacilityManagement: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState<NotificationState>({ show: false, message: '', type: 'success' });
   const [opened, { open, close }] = useDisclosure(false);
-  const [filterOpen, { toggle: toggleFilter }] = useDisclosure(false);
-  const [locationFilter, setLocationFilter] = useState<LocationFilter>({
-    provinsi: '',
-    kabupaten: '',
-    kecamatan: ''
-  });
-  const [facilityTypeFilter, setFacilityTypeFilter] = useState<string>('');
   const [paginationMeta, setPaginationMeta] = useState<HealthFacilityMetadata | null>(null);
   const [filters, setFilters] = useState<FacilityQueryParams>({
     page: 1,
@@ -308,31 +296,7 @@ const handleNumberChange = (name: keyof HealthFacility, value: number | undefine
     }
   };
 
-  // Get unique provinces for filter
-  const uniqueProvinces = [...new Set(facilities.map(f => f.provinsi).filter(Boolean))];
-  
-  // Get unique kabupatens for selected province
-  const uniqueKabupatens = [...new Set(
-    facilities
-      .filter(f => !locationFilter.provinsi || f.provinsi === locationFilter.provinsi)
-      .map(f => f.kabupaten)
-      .filter(Boolean)
-  )];
-  
-  // Get unique kecamatans for selected kabupaten
-  const uniqueKecamatans = [...new Set(
-    facilities
-      .filter(f => 
-        (!locationFilter.provinsi || f.provinsi === locationFilter.provinsi) &&
-        (!locationFilter.kabupaten || f.kabupaten === locationFilter.kabupaten)
-      )
-      .map(f => f.kecamatan)
-      .filter(Boolean)
-  )];
-  
-  // Get unique facility types
-  const uniqueFacilityTypes = [...new Set(facilities.map(f => f.tipe_faskes).filter(Boolean))];
-
+ 
   return (
     <div>
       <Group mb="md">
@@ -362,13 +326,6 @@ const handleNumberChange = (name: keyof HealthFacility, value: number | undefine
           onChange={(e) => setSearchTerm(e.currentTarget.value)}
           style={{ flex: 1 }}
         />
-        <Button
-          variant="outline"
-          leftSection={<IconFilter size={16} />}
-          onClick={toggleFilter}
-        >
-          Filters
-        </Button>
       </Group>
 
       <Accordion mb="md">

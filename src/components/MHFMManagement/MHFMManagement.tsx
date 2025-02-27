@@ -42,10 +42,6 @@ interface HealthFacility {
   nama_faskes: string;
 }
 
-interface DateFilter {
-  tahun: number | null;
-  bulan: number | null;
-}
 
 interface NotificationState {
   show: boolean;

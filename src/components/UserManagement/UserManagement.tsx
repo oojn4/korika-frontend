@@ -18,7 +18,7 @@ import {
   TextInput
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconDotsVertical, IconEdit, IconFilter, IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconDotsVertical, IconEdit, IconFilter, IconTrash } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react';
 import { 
   UserService, 
@@ -168,16 +168,16 @@ const UserManagement: React.FC = () => {
   };
 
   // Open modal for creating a new user
-  const handleAddUser = () => {
-    setCurrentUser(null);
-    setFormData({
-      full_name: '',
-      email: '',
-      access_level: '',
-      password: '',
-    });
-    open();
-  };
+  // const handleAddUser = () => {
+  //   setCurrentUser(null);
+  //   setFormData({
+  //     full_name: '',
+  //     email: '',
+  //     access_level: '',
+  //     password: '',
+  //   });
+  //   open();
+  // };
 
   // Open modal for editing an existing user
   const handleEditUser = (user: User) => {
