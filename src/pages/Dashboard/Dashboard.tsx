@@ -36,12 +36,7 @@ const DashboardPage = () => {
   
   // Tambahkan state untuk daftar provinsi
   const [provinces, setProvinces] = useState<any[]>([]);
-  const mapData = [
-    { lat: -7.250445, lng: 112.768845, value: 50, locationName: 'Surabaya' },
-    { lat: -6.917464, lng: 107.619125, value: 75, locationName: 'Bandung' },
-    { lat: -7.795580, lng: 110.369490, value: 30, locationName: 'Yogyakarta' },
-    { lat: -8.340539, lng: 115.092061, value: 90, locationName: 'Denpasar' },
-  ];
+
   
   // Fetch daftar provinsi
   const handleFetchProvinces = async () => {

@@ -1,5 +1,4 @@
 import { Paper, SimpleGrid, Space, Title } from '@mantine/core';
-import { useEffect } from 'react';
 import { HealthFacilityManagement } from '../../components/HealthFacilityManagement/HealthFacilityManagement';
 import classes from './Admin.module.css';
 

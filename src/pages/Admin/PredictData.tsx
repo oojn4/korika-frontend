@@ -1,5 +1,4 @@
 import { Paper, SimpleGrid, Space, Title } from '@mantine/core';
-import { useEffect } from 'react';
 import classes from './Admin.module.css';
 
 const AdminPage = () => {

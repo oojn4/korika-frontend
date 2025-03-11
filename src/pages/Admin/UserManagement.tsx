@@ -1,5 +1,4 @@
 import { Paper, SimpleGrid, Space, Title } from '@mantine/core';
-import { useEffect } from 'react';
 import UserManagement from '../../components/UserManagement/UserManagement';
 import classes from './Admin.module.css';
 
