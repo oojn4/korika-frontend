@@ -207,7 +207,6 @@ const handleNumberChange = (name: keyof HealthFacility, value: number | undefine
 
   // Handle form submission
   const handleSubmit = async (): Promise<void> => {
-    console.log('Form data:', formData);
     setIsLoading(true);
     setError(null);
 

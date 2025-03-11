@@ -5,9 +5,6 @@ import classes from './Admin.module.css';
 
 const AdminPage = () => {
 
-  useEffect(() => {
-    console.log("ok")
-  })
 
   return (
     <div className={classes.root}>

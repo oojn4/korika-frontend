@@ -26,7 +26,6 @@ const LoginPage = () => {
       open();
       const response : SignInResponse = await AuthService.signIn(email, password) 
       dispatch(setUser(response));
-      console.log(response)
       showSuccessNotification('login-success', 'Anda berhasil login', 3000);
       close()
       navigate('/')

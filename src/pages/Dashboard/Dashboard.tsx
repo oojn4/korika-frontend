@@ -85,24 +85,50 @@ const DashboardPage = () => {
     const response: RawDataResponse = await DashboardService.indexRawData(
       province || '',
     );
-    console.log(response.data)
     if (response.success === true) {
       // Add month_year column to each item
       const updatedData = response.data.map((item) => ({
         ...item,
         month_year: `${item.month}-${item.year}`, // Format the month_year column
       }));
-      console.log(updatedData)
       setRawData(updatedData);
-    }else{
-      console.log('failed')
     }
   };
-  
+  // Function to convert "1-2023" format to "January-2023" format
+  function convertDateFormat(dateString:string) {
+    // Split the string by hyphen
+    const parts = dateString.split('-');
+    
+    // Check if the format is valid
+    if (parts.length !== 2) {
+      return "Invalid date format. Please use format like '1-2023'";
+    }
+    
+    // Get the month number and year
+    const monthNum = parseInt(parts[0], 10);
+    const year = parts[1];
+    
+    // Array of month names
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    
+    // Check if month number is valid (1-12)
+    if (monthNum < 1 || monthNum > 12) {
+      return "Invalid month number. Month should be between 1 and 12";
+    }
+    
+    // Convert month number to month name (array is 0-indexed, so subtract 1)
+    const monthName = monthNames[monthNum - 1];
+    
+    // Return the formatted date string
+    return `${monthName}-${year}`;
+  }
+
   // Panggil fetchProvinces pada useEffect
   useEffect(() => {
     handleFetchProvinces();
-    console.log(mapData);
   }, []);
   
   // Perbarui data ketika provinsi berubah
@@ -111,8 +137,6 @@ const DashboardPage = () => {
   }, [province, year, month]);
 
   useEffect(() => {
-    console.log('handlingfetchrawdata')
-    console.log(textStatbox)
     handleFetchRawData();
 
   }, [province]);
@@ -170,8 +194,6 @@ const DashboardPage = () => {
   
       const monthYearTemp = maxItem ? `${maxItem.month.toString()}-${maxItem.year.toString()}` : '';
       setMonthYear(monthYearTemp);
-      console.log("maxitem")
-      console.log(maxItem)
       if (maxItem) {
         // Filter predicted data untuk bulan berikutnya
         const nextMonth = maxItem.month === 12 ? 1 : maxItem.month + 1;
@@ -179,8 +201,6 @@ const DashboardPage = () => {
         const nextMonthPredictedData = aggregateData.filter(
           (item) => item.status === 'predicted' && item?.year === nextYear && item?.month === nextMonth
         );
-        console.log("data bulan selanjutnya (predicted)")
-        console.log(nextMonthPredictedData)
         const predictedMonthYearTemp = nextMonthPredictedData ? `${nextMonthPredictedData[0]?.month.toString()}-${nextMonthPredictedData[0]?.year.toString()}` : '';
         setPredictedMonthYear(predictedMonthYearTemp);
   
@@ -190,9 +210,6 @@ const DashboardPage = () => {
           return Object.keys(predictedItem)
             .filter((key) => typeof predictedItem[key] === 'number') // Hanya properti numerik
             .map((attribute) => {
-              // attribute = `predicted_${attribute}`
-              // console.log(predictedItem)
-              // Cari nilai `_y_on_y_change` dan `_m_to_m_change` untuk setiap atribut
               const yonyKey = `${attribute}_y_on_y_change`;
               const mtomKey = `${attribute}_m_to_m_change`;
               return {
@@ -238,8 +255,8 @@ const DashboardPage = () => {
       </SimpleGrid>
       <Space h="md" />
       
-      <Text>Actual Data Updated at: {monthYear}</Text>
-      <Text>Predicted Data on Description Ready for: {predictedMonthYear}</Text>
+      <Text>Actual Data Updated at: {convertDateFormat(monthYear)}</Text>
+      <Text>Predicted Data Ready for: {convertDateFormat(predictedMonthYear)}</Text>
       
       <Space h="md" />
       <SimpleGrid cols={{ base: 1, xs: 2, md: 2 }}>
@@ -366,11 +383,12 @@ const DashboardPage = () => {
         <TableRawData
           data={rawData}
           rowsPerPage={10} // Set rows per page
+          predictedMonthYear={convertDateFormat(predictedMonthYear)}
         />
       </SimpleGrid>
       <Space h="lg" />
       <SimpleGrid cols={{ base: 1, xs: 1, md: 1 }}>
-        <MapVisualization data={rawData} />
+        <MapVisualization data={rawData} predictedMonthYear={convertDateFormat(predictedMonthYear)} />
       </SimpleGrid>
       
       

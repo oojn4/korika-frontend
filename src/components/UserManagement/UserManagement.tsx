@@ -193,7 +193,6 @@ const UserManagement: React.FC = () => {
 
   // Handle form submission
   const handleSubmit = async () => {
-    console.log('Form data:', formData);
     setIsLoading(true);
     setError(null);
 

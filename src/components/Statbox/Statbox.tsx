@@ -76,8 +76,6 @@ const Statbox: React.FC<StatboxProps> = ({
   const filteredTextStatBox = textStatbox.filter((item) =>
     series.some((seriesItem) => seriesItem.name === item.label)
   );
-  console.log("data statbox")
-  console.log(data)
   const articleDescriptions = filteredTextStatBox.map((stat) => (
     <Box key={stat.label} style={{ borderBottomColor: stat.color }} className={classes.stat}>
       <Text tt="uppercase" fz="xs" c="dimmed" fw={700}>

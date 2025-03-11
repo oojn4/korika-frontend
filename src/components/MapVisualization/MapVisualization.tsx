@@ -8,10 +8,11 @@ import { RawData } from '../../@types/dashboard';
 mapboxgl.accessToken = 'pk.eyJ1IjoiZmF1emFuZmFsZHkiLCJhIjoiY20yYmF0MG94MG1oYjJrcXhkMWo4dGh4eCJ9.X0AVMmOyRm1Q8ObMiqL7VA'; // Replace with your Mapbox token
 
 interface MapVisualizationProps {
-  data: RawData[]; // Array of data points with lat, lng, value, and location name
+  data: RawData[];
+  predictedMonthYear:string; // Array of data points with lat, lng, value, and location name
 }
 
-const MapVisualization: React.FC<MapVisualizationProps> = ({ data }) => {
+const MapVisualization: React.FC<MapVisualizationProps> = ({ data,predictedMonthYear }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<MapboxMap | null>(null);
   const popupRef = useRef(new Popup({ closeButton: false, closeOnClick: false }));
@@ -165,7 +166,7 @@ const MapVisualization: React.FC<MapVisualizationProps> = ({ data }) => {
   <>
   <Paper  withBorder p="md" radius="md">
     <Group justify="space-between" align="flex-end" gap={0} mb="md">
-        <Text fz="xl" fw={700}>Sebaran Prediksi Jumlah Kasus Malaria Berdasarkan Faskes</Text>
+        <Text fz="xl" fw={700}>Sebaran Prediksi Jumlah Kasus Malaria Berdasarkan Faskes, {predictedMonthYear}</Text>
         <Button variant="subtle" onClick={() => setTableOpen((prev) => !prev)}>
           {tableOpen ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
         </Button>

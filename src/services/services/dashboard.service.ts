@@ -18,7 +18,6 @@ export const DashboardService = {
       headers: { 'Content-Type': 'application/json' },
       method: 'GET',
     })
-    console.log(res)
     return res.data;
   },
   async fetchProvinces(): Promise<ProvincesResponse> {

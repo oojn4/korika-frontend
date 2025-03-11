@@ -6,16 +6,16 @@ import { RawData } from '../../@types/dashboard';
 type Props = {
   data: RawData[];
   rowsPerPage: number;
+  predictedMonthYear: string;
 };
 
-const TableUserApproval = ({ data, rowsPerPage }: Props) => {
+const TableUserApproval = ({ data, rowsPerPage,predictedMonthYear }: Props) => {
   const [activePage, setActivePage] = useState(1);
   const [sortField, setSortField] = useState<'nama_faskes' | 'tot_pos' | 'tot_pos_m_to_m_change' | 'tot_pos_y_on_y_change' | 'province'>('nama_faskes');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [tableOpen, setTableOpen] = useState(true); // State for table visibility
 
   useEffect(() => {
-    console.log('data:', data);
   }, [data]);
 
   // Sorting function
@@ -55,7 +55,7 @@ const TableUserApproval = ({ data, rowsPerPage }: Props) => {
     <Paper withBorder p="md" radius="md">
         
       <Group justify="space-between" align="flex-end" gap={0} mb="md">
-        <Text fz="xl" fw={700}>Tabel Prediksi Jumlah Kasus Malaria Berdasarkan Faskes</Text>
+        <Text fz="xl" fw={700}>Tabel Prediksi Jumlah Kasus Malaria Berdasarkan Faskes, {predictedMonthYear}</Text>
         <Button variant="subtle" onClick={() => setTableOpen((prev) => !prev)}>
           {tableOpen ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
         </Button>
