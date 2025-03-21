@@ -137,48 +137,20 @@ const DashboardPage = () => {
   }, [province]);
 
 
+  // Replace this section in your DashboardPage.tsx file
+// Inside the useEffect that processes aggregateData
+
   useEffect(() => {
+
     if (aggregateData?.length) {
-      // Filter data actual saja
-      // Step 1: Filter actual and predicted data
+      // Filter actual and predicted data
       const actualData = aggregateData.filter((item) => item.status === 'actual');
-      const predictedData = aggregateData.filter(
-        (item) =>
-          item.status === 'predicted' && // Only include "predicted" items
-          !actualData.some((actual) => actual.month_year === item.month_year) // Exclude overlapping month_year
-      );
-
-      // Step 2: Map actual and predicted data with prefixed keys
-      const actualDataWithPrefix = actualData.map((item) => {
-        const newItem: { [key: string]: any } = {};
-        Object.keys(item).forEach((key) => {
-          newItem[`actual_${key}`] = item[key]; // Add "actual_" prefix
-        });
-        return newItem;
-      });
-
-      const predictedDataWithPrefix = predictedData.map((item) => {
-        const newItem: { [key: string]: any } = {};
-        Object.keys(item).forEach((key) => {
-          newItem[`predicted_${key}`] = item[key]; // Add "predicted_" prefix
-        });
-        return newItem;
-      });
-
-      // Step 3: Merge data by the shared key (e.g., "month_year")
-      const mergedData = Array.from(new Set([...actualData, ...predictedData].map((d) => d.month_year)))
-        .map((month_year) => {
-          const actualRow = actualDataWithPrefix.find((item) => item.actual_month_year === month_year) || {};
-          const predictedRow = predictedDataWithPrefix.find((item) => item.predicted_month_year === month_year) || {};
-          return { month_year,...actualRow, ...predictedRow }; // Merge rows
-        });
-
-      setMergedData(mergedData)
-  
-      // Cari maxItem dari data actual
-      const maxItem = actualData.reduce<AggregateData | null>((maxItem, currentItem) => {
+      const predictedData = aggregateData.filter((item) => item.status === 'predicted');
+      
+      // Find the latest actual data point - this is important for connecting the lines
+      const maxActualItem = actualData.reduce<AggregateData | null>((maxItem, currentItem) => {
         if (
-          maxItem === null || // Tangani kondisi awal
+          maxItem === null ||
           currentItem.year > maxItem.year ||
           (currentItem.year === maxItem.year && currentItem.month > maxItem.month)
         ) {
@@ -186,22 +158,111 @@ const DashboardPage = () => {
         }
         return maxItem;
       }, null);
-  
-      const monthYearTemp = maxItem ? `${maxItem.month.toString()}-${maxItem.year.toString()}` : '';
+      
+      // Store latest actual month/year
+      const monthYearTemp = maxActualItem ? `${maxActualItem.month.toString()}-${maxActualItem.year.toString()}` : '';
       setMonthYear(monthYearTemp);
-      if (maxItem) {
-        // Filter predicted data untuk bulan berikutnya
-        const nextMonth = maxItem.month === 12 ? 1 : maxItem.month + 1;
-        const nextYear = maxItem.month === 12 ? maxItem.year + 1 : maxItem.year;
-        const nextMonthPredictedData = aggregateData.filter(
+      
+      // Create data structure for prefixed items
+      const dataWithPrefixes = [...actualData, ...predictedData].map(item => {
+        const result: any = { month_year: item.month_year };
+        
+        // Add all keys with proper prefixes
+        Object.keys(item).forEach(key => {
+          const prefix = item.status === 'actual' ? 'actual_' : 'predicted_';
+          result[`${prefix}${key}`] = item[key];
+        });
+        
+        return result;
+      });
+      
+      // Get all unique month_year values, sorted chronologically
+      const allMonthYears = Array.from(
+        new Set([...actualData, ...predictedData].map((d) => d.month_year))
+      ).sort((a, b) => {
+        const [aMonth, aYear] = a.split('-').map(Number);
+        const [bMonth, bYear] = b.split('-').map(Number);
+        return aYear === bYear ? aMonth - bMonth : aYear - bYear;
+      });
+      
+      // Create the merged data structure
+      const mergedData = allMonthYears.map((month_year) => {
+        // Find the items for this month_year
+        const actualItem = actualData.find((item) => item.month_year === month_year);
+        const predictedItem = predictedData.find((item) => item.month_year === month_year);
+        
+        // Create base object with month_year
+        const result: any = { month_year };
+        
+        // For actual data
+        if (actualItem) {
+          Object.keys(actualItem).forEach(key => {
+            if (key !== 'month_year') {
+              // Add with actual_ prefix
+              result[`actual_${key}`] = actualItem[key];
+            }
+          });
+        }
+        
+        // For predicted data
+        if (predictedItem) {
+          Object.keys(predictedItem).forEach(key => {
+            if (key !== 'month_year') {
+              // Add with predicted_ prefix
+              result[`predicted_${key}`] = predictedItem[key];
+            }
+          });
+        }
+        
+        return result;
+      });
+      
+      // KEY IMPROVEMENT: If the last actual month is the same as the first predicted month,
+      // copy the actual values to the predicted series for that month to create visual continuity
+      if (maxActualItem) {
+        const latestActualMonthYear = `${maxActualItem.month}-${maxActualItem.year}`;
+        
+        // Find the entry for the latest actual month
+        const latestActualEntry = mergedData.find(item => item.month_year === latestActualMonthYear);
+        
+        if (latestActualEntry) {
+          // Copy actual values to predicted for metrics that should connect
+          Object.keys(latestActualEntry).forEach(key => {
+            if (key.startsWith('actual_') && !key.includes('status') && !key.includes('month_year')) {
+              // Get the base metric name (without prefix)
+              const metricName = key.replace('actual_', '');
+              
+              // Create the predicted key name
+              const predictedKey = `predicted_${metricName}`;
+              
+              // Copy the value to create the connection point
+              latestActualEntry[predictedKey] = latestActualEntry[key];
+            }
+          });
+        }
+      }
+      
+      setMergedData(mergedData);
+      
+      // Find the predicted data for the next month after the latest actual
+      if (maxActualItem) {
+        const nextMonth = maxActualItem.month === 12 ? 1 : maxActualItem.month + 1;
+        const nextYear = maxActualItem.month === 12 ? maxActualItem.year + 1 : maxActualItem.year;
+        
+        const nextMonthPredictedData = predictedData.filter(
           (item) => item.status === 'predicted' && item?.year === nextYear && item?.month === nextMonth
         );
-        const predictedMonthYearTemp = nextMonthPredictedData ? `${nextMonthPredictedData[0]?.month.toString()}-${nextMonthPredictedData[0]?.year.toString()}` : '';
+        
+        const predictedMonthYearTemp = nextMonthPredictedData.length > 0 
+          ? `${nextMonthPredictedData[0]?.month.toString()}-${nextMonthPredictedData[0]?.year.toString()}` 
+          : '';
+        
         setPredictedMonthYear(predictedMonthYearTemp);
-  
-
-        // Mapping data bulan berikutnya
-        const mappedData = nextMonthPredictedData.map((predictedItem) => {
+        
+        // Continue with your existing code for textStatbox generation...
+        // (textStatbox doesn't need to change for this approach)
+         // Mapping data bulan berikutnya
+         const mappedData = nextMonthPredictedData.map((predictedItem) => {
           return Object.keys(predictedItem)
             .filter((key) => typeof predictedItem[key] === 'number') // Hanya properti numerik
             .map((attribute) => {
@@ -227,7 +288,7 @@ const DashboardPage = () => {
       }
     }
   }, [aggregateData]);
-    
+
   return (
     <div className={classes.root}>
       <Title order={1}>Welcome to Dashboard Panel</Title>
@@ -254,124 +315,134 @@ const DashboardPage = () => {
       <Text>Predicted Data Ready for: {convertDateFormat(predictedMonthYear)}</Text>
       
       <Space h="md" />
-      <SimpleGrid cols={{ base: 1, xs: 2, md: 2 }}>
-      <Statbox
-        title="Konfirmasi Lab"
-        icon={IconArticle}
-        data={mergedData}
-        textStatbox={textStatbox}
-        dataKey="month_year"
-        series={[
-          { name: 'actual_konfirmasi_lab_mikroskop', color: 'indigo.6' },
-          { name: 'predicted_konfirmasi_lab_mikroskop', color: 'grey' },
-          { name: 'actual_konfirmasi_lab_rdt', color: 'blue.6' },
-          { name: 'predicted_konfirmasi_lab_rdt', color: 'grey' },
-          { name: 'actual_konfirmasi_lab_pcr', color: 'teal.6' },
-          { name: 'predicted_konfirmasi_lab_pcr', color: 'grey' },
-        ]}
-        isCollapsible
-      />
-      <Statbox
-        title="Kelompok Umur"
-        icon={IconArticle}
-        data={mergedData}
-        textStatbox={textStatbox}
-        dataKey="month_year"
-        series={[
-          { name: 'actual_pos_0_4', color: '#FFC1CC' }, // Pastel Pink
-          { name: 'actual_pos_5_14', color: '#87CEEB' }, // Sky Blue
-          { name: 'actual_pos_15_64', color: '#50C878' }, // Emerald Green
-          { name: 'actual_pos_diatas_64', color: '#E6E6FA' }, // Lavender
-          { name: 'predicted_pos_0_4', color: 'grey' }, // Pastel Pink
-          { name: 'predicted_pos_5_14', color: 'grey' }, // Sky Blue
-          { name: 'predicted_pos_15_64', color: 'grey' }, // Emerald Green
-          { name: 'predicted_pos_diatas_64', color: 'grey' }, // Lavender
-        ]}
-        
-        isCollapsible
-      />
-      </SimpleGrid>
-      <Space h="lg" />
-      <SimpleGrid cols={{ base: 1, xs: 2, md: 2 }}>
-      <Statbox
-        title="Ibu Hamil dan Kematian"
-        icon={IconArticle}
-        data={mergedData}
-        textStatbox={textStatbox}
-        dataKey="month_year"
-        series={[
-          { name: 'actual_hamil_pos', color: 'blue.6' },
-          { name: 'actual_kematian_malaria', color: 'teal.6' },
-          
-          { name: 'predicted_hamil_pos', color: 'grey' },
-          { name: 'predicted_kematian_malaria', color: 'grey' },
-        ]}
-        isCollapsible
-      />
-      
-      <Statbox
-        title="Penggunaan Obat"
-        icon={IconArticle}
-        data={mergedData}
-        textStatbox={textStatbox}
-        dataKey="month_year"
-        series={[
-          { name: 'actual_obat_standar', color: 'indigo.6' },
-          { name: 'actual_obat_nonprogram', color: 'blue.6' },
-          { name: 'actual_obat_primaquin', color: 'teal.6' },
-          { name: 'predicted_obat_standar', color: 'grey' },
-          { name: 'predicted_obat_nonprogram', color: 'grey' },
-          { name: 'predicted_obat_primaquin', color: 'grey' },
-        ]}
-        isCollapsible
-      />
-      </SimpleGrid>
-      <Space h="lg" />
-      <SimpleGrid cols={{ base: 1, xs: 2, md: 2 }}>
-      <Statbox
-        title="Tipe Parasit"
-        icon={IconArticle}
-        data={mergedData}
-        textStatbox={textStatbox}
-        dataKey="month_year"
-        series={[
-          { name: 'actual_p_pf', color: 'blue.6' },
-          { name: 'actual_p_pv', color: 'cyan.6' },
-          { name: 'actual_p_po', color: 'green.6' },
-          { name: 'actual_p_pm', color: 'lime.6' },
-          { name: 'actual_p_pk', color: 'orange.6' },
-          { name: 'actual_p_mix', color: 'teal.6' },
-          { name: 'actual_p_suspek_pk', color: 'red.6' },
-          
-          { name: 'predicted_p_pf', color: 'grey' },
-          { name: 'predicted_p_pv', color: 'grey' },
-          { name: 'predicted_p_po', color: 'grey' },
-          { name: 'predicted_p_pm', color: 'grey' },
-          { name: 'predicted_p_pk', color: 'grey' },
-          { name: 'predicted_p_mix', color: 'grey' },
-          { name: 'predicted_p_suspek_pk', color: 'grey' }
+      {/* Replace the first set of Statbox components with these */}
 
-        ]}
-        isCollapsible
-      />
-      
-      <Statbox
-        title="Origin"
-        icon={IconArticle}
-        data={mergedData}
-        textStatbox={textStatbox}
-        dataKey="month_year"
-        series={[
-          { name: 'actual_penularan_indigenus', color: 'indigo.6' },
-          { name: 'actual_penularan_impor', color: 'blue.6' },
-          { name: 'actual_penularan_induced', color: 'teal.6' },
-          
-          { name: 'predicted_penularan_indigenus', color: 'grey' },
-          { name: 'predicted_penularan_impor', color: 'grey' },
-          { name: 'predicted_penularan_induced', color: 'grey' },
-        ]}
-        isCollapsible
-      />
+      {/* Replace the first set of Statbox components with these */}
+
+      <SimpleGrid cols={{ base: 1, xs: 2, md: 2 }}>
+        <Statbox
+          title="Konfirmasi Lab"
+          icon={IconArticle}
+          data={mergedData}
+          textStatbox={textStatbox}
+          dataKey="month_year"
+          series={[
+            // Keep separate series with distinct colors,
+            { name: 'predicted_konfirmasi_lab_mikroskop', color: 'grey' },
+            { name: 'actual_konfirmasi_lab_mikroskop', color: 'indigo.6' },
+            { name: 'predicted_konfirmasi_lab_rdt', color: 'grey' },
+            { name: 'actual_konfirmasi_lab_rdt', color: 'blue.6' },
+            { name: 'predicted_konfirmasi_lab_pcr', color: 'grey' },
+            { name: 'actual_konfirmasi_lab_pcr', color: 'teal.6' },
+          ]}
+          isCollapsible
+        />
+        <Statbox
+          title="Kelompok Umur"
+          icon={IconArticle}
+          data={mergedData}
+          textStatbox={textStatbox}
+          dataKey="month_year"
+          series={[
+            
+            // Predicted series all in grey
+            { name: 'predicted_pos_0_4', color: 'grey' },
+            { name: 'predicted_pos_5_14', color: 'grey' },
+            { name: 'predicted_pos_15_64', color: 'grey' },
+            { name: 'predicted_pos_diatas_64', color: 'grey' },
+            // Actual series with colors
+            { name: 'actual_pos_0_4', color: '#FFC1CC' },
+            { name: 'actual_pos_5_14', color: '#87CEEB' },
+            { name: 'actual_pos_15_64', color: '#50C878' },
+            { name: 'actual_pos_diatas_64', color: '#E6E6FA' },
+            
+          ]}
+          isCollapsible
+        />
+      </SimpleGrid>
+      <Space h="lg" />
+      <SimpleGrid cols={{ base: 1, xs: 2, md: 2 }}>
+        <Statbox
+          title="Ibu Hamil dan Kematian"
+          icon={IconArticle}
+          data={mergedData}
+          textStatbox={textStatbox}
+          dataKey="month_year"
+          series={[
+            
+            { name: 'predicted_hamil_pos', color: 'grey' },
+            { name: 'predicted_kematian_malaria', color: 'grey' },
+            
+            { name: 'actual_hamil_pos', color: 'blue.6' },
+            { name: 'actual_kematian_malaria', color: 'teal.6' },
+          ]}
+          isCollapsible
+        />
+        
+        <Statbox
+          title="Penggunaan Obat"
+          icon={IconArticle}
+          data={mergedData}
+          textStatbox={textStatbox}
+          dataKey="month_year"
+          series={[
+            
+            { name: 'predicted_obat_standar', color: 'grey' },
+            { name: 'predicted_obat_nonprogram', color: 'grey' },
+            { name: 'predicted_obat_primaquin', color: 'grey' },
+            
+            { name: 'actual_obat_standar', color: 'indigo.6' },
+            { name: 'actual_obat_nonprogram', color: 'blue.6' },
+            { name: 'actual_obat_primaquin', color: 'teal.6' },
+          ]}
+          isCollapsible
+        />
+      </SimpleGrid>
+      <Space h="lg" />
+      <SimpleGrid cols={{ base: 1, xs: 2, md: 2 }}>
+        <Statbox
+          title="Tipe Parasit"
+          icon={IconArticle}
+          data={mergedData}
+          textStatbox={textStatbox}
+          dataKey="month_year"
+          series={[
+            { name: 'predicted_p_pf', color: 'grey' },
+            { name: 'predicted_p_pv', color: 'grey' },
+            { name: 'predicted_p_po', color: 'grey' },
+            { name: 'predicted_p_pm', color: 'grey' },
+            { name: 'predicted_p_pk', color: 'grey' },
+            { name: 'predicted_p_mix', color: 'grey' },
+            { name: 'predicted_p_suspek_pk', color: 'grey' },
+            
+            { name: 'actual_p_pf', color: 'blue.6' },
+            { name: 'actual_p_pv', color: 'cyan.6' },
+            { name: 'actual_p_po', color: 'green.6' },
+            { name: 'actual_p_pm', color: 'lime.6' },
+            { name: 'actual_p_pk', color: 'orange.6' },
+            { name: 'actual_p_mix', color: 'teal.6' },
+            { name: 'actual_p_suspek_pk', color: 'red.6' },
+          ]}
+          isCollapsible
+        />
+        
+        <Statbox
+          title="Origin"
+          icon={IconArticle}
+          data={mergedData}
+          textStatbox={textStatbox}
+          dataKey="month_year"
+          series={[
+            { name: 'predicted_penularan_indigenus', color: 'grey' },
+            { name: 'predicted_penularan_impor', color: 'grey' },
+            { name: 'predicted_penularan_induced', color: 'grey' },
+            
+            { name: 'actual_penularan_indigenus', color: 'indigo.6' },
+            { name: 'actual_penularan_impor', color: 'blue.6' },
+            { name: 'actual_penularan_induced', color: 'teal.6' },
+          ]}
+          isCollapsible
+        />
       </SimpleGrid>
       <Space h="lg" />
       <SimpleGrid cols={{ base: 1, xs: 1, md: 1 }}>

@@ -60,22 +60,45 @@ const MapVisualization: React.FC<MapVisualizationProps> = ({ data,predictedMonth
             type: 'circle',
             source: 'points-data',
             paint: {
+              // Circle radius based on tot_pos value
               'circle-radius': [
                 'interpolate',
                 ['linear'],
-                ['get', 'value'],
-                0, 5,   // Smaller radius for lower values
-                100, 15 // Larger radius for higher values
+                ['get', 'tot_pos'],
+                0, 5,         // Base size for 0 values
+                10, 8,        // Medium size
+                50, 12,       // Larger
+                100, 16,      // Even larger
+                200, 20       // Maximum size
               ],
+              // Circle color based on tot_pos value
               'circle-color': [
-                'interpolate',
-                ['linear'],
-                ['get', 'value'],
-                0, '#67000d', // Dark red
-                50, '#cb181d', // Medium red
-                100, '#fee5d9' // Very light peach
+                'case',
+                ['==', ['get', 'tot_pos'], 0],
+                '#000000',    // Black for 0 values
+                [
+                  'interpolate',
+                  ['linear'],
+                  ['get', 'tot_pos'],
+                  1, '#fee5d9',     // Very light red for low values
+                  10, '#fcbba1',    // Light red
+                  50, '#fc9272',    // Medium-light red
+                  100, '#fb6a4a',   // Medium red
+                  150, '#ef3b2c',   // Medium-dark red
+                  200, '#cb181d',   // Dark red
+                  300, '#a50f15',   // Very dark red
+                  500, '#67000d'    // Extremely dark red
+                ]
               ],
-              'circle-opacity': 0.8
+              'circle-opacity': 0.8,
+              // Add outline to make points more visible
+              'circle-stroke-width': 1,
+              'circle-stroke-color': [
+                'case',
+                ['==', ['get', 'tot_pos'], 0],
+                '#555555',    // Dark gray stroke for black dots
+                '#ffffff'     // White stroke for colored dots
+              ]
             }
           });
 
@@ -98,13 +121,16 @@ const MapVisualization: React.FC<MapVisualizationProps> = ({ data,predictedMonth
                 });
         
                 popupRef.current
-                    .setLngLat([coordinates[0], coordinates[1]])
-                    .setHTML(`
-                    <div style="background-color: white; color: black;">
-                        <strong>Value:</strong> ${properties.tot_pos}<br/>
-                        <strong>Location:</strong> ${properties.nama_faskes}<br/>
-                    </div>
-                    `);
+                .setLngLat([coordinates[0], coordinates[1]])
+                .setHTML(`
+                  <div style="background-color: white; color: black; padding: 8px; border-radius: 4px; font-family: sans-serif;">
+                    <strong style="font-size: 14px;">${properties.nama_faskes}</strong><br/>
+                    <span style="font-size: 12px; margin-top: 4px; display: block;">
+                      <strong>Jumlah Kasus:</strong> ${properties.tot_pos} 
+                      ${properties.tot_pos === 0 ? '(Tidak ada kasus)' : ''}
+                    </span>
+                  </div>
+                `);
                 if (map.current) {
                     popupRef.current.addTo(map.current); // Ensures map.current is not null before using it
                 }

@@ -3,6 +3,7 @@ import { Box, Button, Collapse, Group, Modal, Paper, SimpleGrid, Space, Text } f
 import { Icon, IconChevronDown, IconChevronUp, IconProps } from '@tabler/icons-react';
 import { ForwardRefExoticComponent, RefAttributes, useState } from 'react';
 import classes from './Statbox.module.css';
+
 interface TablerIconProps
   extends Partial<
     ForwardRefExoticComponent<
@@ -15,15 +16,22 @@ interface TablerIconProps
   className?: string;
 }
 
+interface SeriesItem {
+  name: string;
+  color: string;
+  lineHidden?: boolean;
+}
+
 interface StatboxProps {
   title: string;
   icon?: React.ComponentType<TablerIconProps>;
   data: any[];
-  textStatbox:any[];
+  textStatbox: any[];
   dataKey: string;
-  series: { name: string; color: string }[];
+  series: SeriesItem[];
   isCollapsible?: boolean;
 }
+
 interface ChartTooltipProps {
   label: string;
   payload: Record<string, any>[] | undefined;
@@ -32,25 +40,92 @@ interface ChartTooltipProps {
 function ChartTooltip({ label, payload }: ChartTooltipProps) {
   if (!payload || payload.length === 0) return null;
 
+  // Get the data item for this month/date point
+  const dataItem = payload[0]?.payload;
+  
+  // Check if this is a predicted data point
+  const isPredicted = dataItem?.is_predicted === true;
+
+  // Group items by base metric name (removing prefixes)
+  const groupedItems: { [key: string]: any[] } = {};
+  
+  payload.forEach((item: any) => {
+    const name = item.name;
+    const isActual = name.startsWith('actual_');
+    const isPredicted = name.startsWith('predicted_');
+    
+    if (isActual || isPredicted) {
+      // Remove prefix for grouping
+      const baseName = name.replace(/^(actual_|predicted_)/, '');
+      
+      if (!groupedItems[baseName]) {
+        groupedItems[baseName] = [];
+      }
+      
+      // Only add to grouped items if:
+      // 1. It's an actual value, or
+      // 2. It's a predicted value AND there's no actual value for this metric and date
+      const hasActualForThisMetric = payload.some(p => 
+        p.name === `actual_${baseName}` && p.value !== undefined && p.value !== null
+      );
+      
+      if (isActual || (isPredicted && !hasActualForThisMetric)) {
+        groupedItems[baseName].push({
+          ...item,
+          type: isActual ? 'actual' : 'predicted'
+        });
+      }
+    } else {
+      // Handle non-prefixed series (for continuous data approach)
+      if (!groupedItems[name]) {
+        groupedItems[name] = [];
+      }
+      
+      groupedItems[name].push({
+        ...item,
+        type: isPredicted ? 'predicted' : 'actual'
+      });
+    }
+  });
+
   return (
     <Paper
-      px="sm" // Smaller horizontal padding
-      py="xs" // Smaller vertical padding
+      px="sm"
+      py="xs"
       withBorder
-      shadow="sm" // Reduced shadow
-      radius="sm" // Smaller border radius
+      shadow="sm"
+      radius="sm"
     >
-      <Text fw={400} mb={3} fz="xs"> {/* Smaller font size and weight */}
-        {label}
+      <Text fw={500} mb={5} fz="sm">
+        {label} {isPredicted && <Text span size="xs" color="dimmed">(predicted)</Text>}
       </Text>
-      {payload.map((item: any) => (
-        <Text key={item.name} c={item.color} fz="xs" lh="1.2"> {/* Smaller font size and line height */}
-          {item.name}: {item.value} 
-        </Text>
+      
+      {Object.entries(groupedItems).map(([baseName, items]) => (
+        <Box key={baseName} mb={5}>
+          <Text fw={500} fz="xs">{baseName}:</Text>
+          
+          {items.map(item => {
+            // Determine color based on data type
+            const textColor = item.type === 'predicted' ? 'gray' : item.color;
+            
+            return (
+              <Text 
+                key={`${item.name}-${item.type}`} 
+                c={textColor} 
+                fz="xs" 
+                lh="1.2"
+                pl={8}
+              >
+                {item.value} {item.type === 'predicted' && <Text span size="xs" c="dimmed">(predicted)</Text>}
+              </Text>
+            );
+          })}
+        </Box>
       ))}
     </Paper>
   );
 }
+
 const Statbox: React.FC<StatboxProps> = ({
   title,
   icon: Icon,
@@ -72,10 +147,14 @@ const Statbox: React.FC<StatboxProps> = ({
     setModalOpen(false);
   };
 
+  // Filter the series to get visible series (not hidden)
+  const visibleSeries = series.filter(item => !item.lineHidden);
   
+  // Keep all series for stat filtering
   const filteredTextStatBox = textStatbox.filter((item) =>
     series.some((seriesItem) => seriesItem.name === item.label)
   );
+  
   const articleDescriptions = filteredTextStatBox.map((stat) => (
     <Box key={stat.label} style={{ borderBottomColor: stat.color }} className={classes.stat}>
       <Text tt="uppercase" fz="xs" c="dimmed" fw={700}>
@@ -83,11 +162,11 @@ const Statbox: React.FC<StatboxProps> = ({
       </Text>
       <Group justify="space-between" align="flex-end" gap={0}>
         <div style={{ textAlign: 'left', flex: '0 0 auto' }}> 
-            <Text fw={500}  > {/* Use text alignment */}
+            <Text fw={500}> 
                 {stat.count}
             </Text>
         </div>
-        <div style={{ textAlign: 'right' }}> {/* Set div content alignment */}
+        <div style={{ textAlign: 'right' }}> 
             <Text c={stat.color_m_to_m} fw={500} size="sm" className={classes.statCount}>
             {stat.m_to_m?.toFixed(2)}%
             </Text>
@@ -95,7 +174,7 @@ const Statbox: React.FC<StatboxProps> = ({
             M-to-M
             </Text>
         </div>
-        <div style={{ textAlign: 'right' }}> {/* Set div content alignment */}
+        <div style={{ textAlign: 'right' }}> 
             <Text c={stat.color_y_on_y} fw={500} size="sm" className={classes.statCount}>
             {stat.y_on_y?.toFixed(2)}%
             </Text>
@@ -104,7 +183,6 @@ const Statbox: React.FC<StatboxProps> = ({
             </Text>
         </div>
        </Group>
-
     </Box>
   ));
 
@@ -122,7 +200,6 @@ const Statbox: React.FC<StatboxProps> = ({
             variant="subtle"
             size="xs"
             onClick={() => setOpened((prev) => !prev)}
-            // onClick={()=>console.log(series)}
           >
             {opened ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
           </Button>
@@ -134,14 +211,23 @@ const Statbox: React.FC<StatboxProps> = ({
           h={300}
           data={data}
           dataKey={dataKey}
-          series={series}
+          series={visibleSeries}
           curveType="linear"
-          onClick={handleChartClick} // Add click handler
+          onClick={handleChartClick}
           tooltipProps={{
             content: ({ label, payload }) => <ChartTooltip label={label} payload={payload} />,
           }}
           withXAxis
+          withLegend={false} // Disable default legend, we'll use custom one
         />
+        
+        {/* Custom Legend */}
+        <Space h="xs" />
+        {/* <CustomLegend 
+          actualSeries={series.filter(s => s.name.startsWith('actual_'))} 
+          title={title}
+        /> */}
+        
         {/* Modal for enlarged chart */}
         <Modal
             opened={isModalOpen}
@@ -150,13 +236,20 @@ const Statbox: React.FC<StatboxProps> = ({
             title={title}
         >
             <LineChart
-            h={600} // Enlarged height
-            data={data}
-            dataKey={dataKey}
-            series={series}
-            curveType="linear"
+              h={600}
+              data={data}
+              dataKey={dataKey}
+              series={visibleSeries}
+              curveType="linear"
+              withLegend={false}
             />
+            <Space h="md" />
+            {/* <CustomLegend 
+              actualSeries={series.filter(s => s.name.startsWith('actual_'))} 
+              title={title}
+            /> */}
         </Modal>
+        
         <Space h="md" />
         <SimpleGrid cols={{ base: 1, xs: 2 }} mt="xl">
           {articleDescriptions}
