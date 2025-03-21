@@ -164,17 +164,17 @@ const DashboardPage = () => {
       setMonthYear(monthYearTemp);
       
       // Create data structure for prefixed items
-      const dataWithPrefixes = [...actualData, ...predictedData].map(item => {
-        const result: any = { month_year: item.month_year };
+      // const dataWithPrefixes = [...actualData, ...predictedData].map(item => {
+      //   const result: any = { month_year: item.month_year };
         
-        // Add all keys with proper prefixes
-        Object.keys(item).forEach(key => {
-          const prefix = item.status === 'actual' ? 'actual_' : 'predicted_';
-          result[`${prefix}${key}`] = item[key];
-        });
+      //   // Add all keys with proper prefixes
+      //   Object.keys(item).forEach(key => {
+      //     const prefix = item.status === 'actual' ? 'actual_' : 'predicted_';
+      //     result[`${prefix}${key}`] = item[key];
+      //   });
         
-        return result;
-      });
+      //   return result;
+      // });
       
       // Get all unique month_year values, sorted chronologically
       const allMonthYears = Array.from(
