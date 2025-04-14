@@ -3,7 +3,7 @@ import Footer from '../../components/Footer/Footer';
 import IntroDashboard from '../../components/IntroDashboard/IntroDashboard';
 
 const HomePage = () => {
-  useDocumentTitle('Monitoring Malaria')
+  useDocumentTitle('Climate Smart Indonesia')
   return (
     <>
       <IntroDashboard />

@@ -18,7 +18,7 @@ const UserToggle: React.FC = () => {
 
   const handleLogout = () => {
     dispatch(logout());
-    showSuccessNotification('success-signout', 'Anda berhasil logout', 3000)
+    showSuccessNotification('success-signout', 'Logout successful', 3000)
   };
 
   const LoginMenuButton = () => {

@@ -4,7 +4,7 @@ import { showErrorNotification } from "./notifications";
 export const showErrorFetching = (error: any) => {
     showErrorNotification(
     'error-fetch',
-    (error instanceof AxiosError) ? `${error.status} ${error.response?.data.message}` : String(error),
+    (error instanceof AxiosError) ? `${error.status} ${error.response?.data.message}` : String(error.error),
     5000
   );
   console.error(error);

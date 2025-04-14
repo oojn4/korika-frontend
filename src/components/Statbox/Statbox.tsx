@@ -30,6 +30,7 @@ interface StatboxProps {
   dataKey: string;
   series: SeriesItem[];
   isCollapsible?: boolean;
+  filterComponent?: React.ReactNode; // New prop for filter component
 }
 
 interface ChartTooltipProps {
@@ -134,6 +135,7 @@ const Statbox: React.FC<StatboxProps> = ({
   dataKey,
   series,
   isCollapsible = true,
+  filterComponent, // New prop
 }) => {
   const [opened, setOpened] = useState(true);
   const [isModalOpen, setModalOpen] = useState(false);
@@ -185,7 +187,22 @@ const Statbox: React.FC<StatboxProps> = ({
        </Group>
     </Box>
   ));
-
+  
+  const getMaxYValue = () => {
+    let max = 0;
+  
+    data.forEach((item) => {
+      visibleSeries.forEach((s) => {
+        const val = Number(item[s.name]);
+        if (!isNaN(val) && val > max) {
+          max = val;
+        }
+      });
+    });
+  
+    return Math.ceil(max * 1.05); // Add 5% buffer
+  };
+  
   return (
     <Paper withBorder p="md" radius="md">
       <Group justify="space-between">
@@ -207,6 +224,14 @@ const Statbox: React.FC<StatboxProps> = ({
       </Group>
 
       <Collapse in={opened}>
+        {/* Include the filter component if provided */}
+        {filterComponent && (
+          <>
+            {filterComponent}
+            <Space h="xs" />
+          </>
+        )}
+        
         <LineChart
           h={300}
           data={data}
@@ -218,15 +243,14 @@ const Statbox: React.FC<StatboxProps> = ({
             content: ({ label, payload }) => <ChartTooltip label={label} payload={payload} />,
           }}
           withXAxis
-          withLegend={false} // Disable default legend, we'll use custom one
+          withLegend={false}
+          yAxisProps={{
+            domain: [0, getMaxYValue()],
+            tickCount: 6,
+          }}
         />
         
-        {/* Custom Legend */}
         <Space h="xs" />
-        {/* <CustomLegend 
-          actualSeries={series.filter(s => s.name.startsWith('actual_'))} 
-          title={title}
-        /> */}
         
         {/* Modal for enlarged chart */}
         <Modal
@@ -242,12 +266,12 @@ const Statbox: React.FC<StatboxProps> = ({
               series={visibleSeries}
               curveType="linear"
               withLegend={false}
+              yAxisProps={{
+                domain: [0, getMaxYValue()],
+                tickCount: 8,
+              }}
             />
             <Space h="md" />
-            {/* <CustomLegend 
-              actualSeries={series.filter(s => s.name.startsWith('actual_'))} 
-              title={title}
-            /> */}
         </Modal>
         
         <Space h="md" />

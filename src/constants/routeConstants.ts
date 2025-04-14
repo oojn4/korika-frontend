@@ -3,10 +3,22 @@ import { Routes } from '../@types/route'
 
 export const PROTECTEDROUTES: Routes = [
   {
-    key: 'dashboard',
-    name: 'Dashboard',
-    path: '/dashboard',
-    element: lazy(() => import('../pages/Dashboard/Dashboard')),
+    key: 'malaria',
+    name: 'Malaria',
+    path: '/dashboard/malaria',
+    element: lazy(() => import('../pages/Dashboard/Malaria')),
+  },
+  {
+    key: 'lepto',
+    name: 'Lepto',
+    path: '/dashboard/lepto',
+    element: lazy(() => import('../pages/Dashboard/Lepto')),
+  },
+  {
+    key: 'dbd',
+    name: 'DBD',
+    path: '/dashboard/dbd',
+    element: lazy(() => import('../pages/Dashboard/DBD')),
   }
 ]
 
@@ -29,24 +41,24 @@ export const ADMINROUTES: Routes = [
     path: '/health-facility-management',
     element: lazy(() => import('../pages/Admin/HealthFacilityManagement')),
   },
-  {
-    key: 'mhfm-management',
-    name: 'Malaria Health Facility Monthly Management',
-    path: '/mhfm-management',
-    element: lazy(() => import('../pages/Admin/MHFMManagement')),
-  },
-  {
-    key: 'upload-data',
-    name: 'Upload Actual Data',
-    path: '/upload-data',
-    element: lazy(() => import('../pages/Admin/UploadData')),
-  },
-  {
-    key: 'training-model',
-    name: 'Create Prediction Data',
-    path: '/training-model',
-    element: lazy(() => import('../pages/Admin/TrainingModel')),
-  },
+  // {
+  //   key: 'mhfm-management',
+  //   name: 'Malaria Health Facility Monthly Management',
+  //   path: '/mhfm-management',
+  //   element: lazy(() => import('../pages/Admin/MHFMManagement')),
+  // },
+  // {
+  //   key: 'upload-data',
+  //   name: 'Upload Actual Data',
+  //   path: '/upload-data',
+  //   element: lazy(() => import('../pages/Admin/UploadData')),
+  // },
+  // {
+  //   key: 'training-model',
+  //   name: 'Create Prediction Data',
+  //   path: '/training-model',
+  //   element: lazy(() => import('../pages/Admin/TrainingModel')),
+  // },
 ]
 
 export const PUBLICROUTES: Routes = [

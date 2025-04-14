@@ -7,6 +7,7 @@ export type AppConfig = {
   backendApiUrl: string
   // backendApiKey: string
   persistKey: string
+  bmkgApiUrl: string
 }
 
 const appConfig: AppConfig = {
@@ -17,7 +18,8 @@ const appConfig: AppConfig = {
   authJwtAge: 1209600,
   backendApiUrl: 'http://localhost:5000',
   // backendApiKey: 'Yo5x0ZoGgqLOAZTJgDbIirbuNe2QBhnqVHnIOQT3JtxwMWDlJU1qDbmskAcpNMpg',
-  persistKey: 'root'
+  persistKey: 'root',
+  bmkgApiUrl: 'https://api.bmkg.go.id',
 }
 
 export default appConfig

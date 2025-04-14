@@ -5,18 +5,21 @@ import {
   Group,
   ScrollArea,
   Title,
-  rem
+  rem,
+  Menu, // Added Menu component
+  UnstyledButton, // Added for the dropdown trigger
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { To, useNavigate } from 'react-router-dom';
 import { RootState } from '../../store/store';
 import { checkAdminAccess } from '../../utils/checkAccess';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import UserToggle from '../UserToggle/UserToggle';
 import classes from './Header.module.css';
+import { IconChevronDown } from '@tabler/icons-react'; // Import dropdown icon
 
 const HeaderComponent = () => {
   const user = useSelector((state: RootState) => state.auth.user);
@@ -26,6 +29,13 @@ const HeaderComponent = () => {
   
   const handleClickedLogo = () => {
     navigate('/');
+  }
+
+  const navigateTo = (path: To) => {
+    navigate(path);
+    if (drawerOpened) {
+      closeDrawer();
+    }
   }
 
   return (
@@ -48,9 +58,38 @@ const HeaderComponent = () => {
                 {t('header.admin')}
               </a>
             }
-            <a href="/dashboard" className={classes.link}>
-              {t('header.dashboard')}
-            </a>
+            
+            {/* Dashboard dropdown menu */}
+            <Menu 
+              position="bottom-start"
+              offset={0}
+              withArrow
+              transitionProps={{ transition: 'pop' }}
+            >
+              <Menu.Target>
+                <UnstyledButton className={classes.link}>
+                  <Group gap={5}>
+                    <span>{t('header.dashboard')}</span>
+                    <IconChevronDown size={16} />
+                  </Group>
+                </UnstyledButton>
+              </Menu.Target>
+
+              <Menu.Dropdown>
+                {/* <Menu.Item onClick={() => navigateTo('/dashboard')}>
+                  {t('header.dashboard')}
+                </Menu.Item> */}
+                <Menu.Item onClick={() => navigateTo('/dashboard/malaria')}>
+                  Malaria
+                </Menu.Item>
+                <Menu.Item onClick={() => navigateTo('/dashboard/lepto')}>
+                  Lepto
+                </Menu.Item>
+                <Menu.Item onClick={() => navigateTo('/dashboard/dbd')}>
+                  DBD
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
           </Group>
 
           <Group visibleFrom="sm" gap={5}>
@@ -83,13 +122,42 @@ const HeaderComponent = () => {
             {t('header.home')}
           </a>
           {checkAdminAccess(user?.roles || []) &&
-            <a href="/dashboard" className={classes.link}>
+            <a href="/admin" className={classes.link}>
               {t('header.admin')}
             </a>
           }
-          <a href="/dashboard" className={classes.link}>
-            {t('header.dashboard')}
-          </a>
+          
+          {/* Mobile view dropdown implementation */}
+          <Menu 
+            position="bottom-start" 
+            offset={0}
+            withArrow
+            transitionProps={{ transition: 'pop' }}
+          >
+            <Menu.Target>
+              <UnstyledButton className={classes.link}>
+                <Group gap={5}>
+                  <span>{t('header.dashboard')}</span>
+                  <IconChevronDown size={16} />
+                </Group>
+              </UnstyledButton>
+            </Menu.Target>
+
+            <Menu.Dropdown>
+              <Menu.Item onClick={() => navigateTo('/dashboard')}>
+                {t('header.dashboard')}
+              </Menu.Item>
+              <Menu.Item onClick={() => navigateTo('/dashboard/malaria')}>
+                Malaria
+              </Menu.Item>
+              <Menu.Item onClick={() => navigateTo('/dashboard/lepto')}>
+                Lepto
+              </Menu.Item>
+              <Menu.Item onClick={() => navigateTo('/dashboard/dbd')}>
+                DBD
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
 
           <Divider my="sm" />
 
@@ -102,4 +170,4 @@ const HeaderComponent = () => {
   );
 }
 
-export default React.memo(HeaderComponent)
+export default React.memo(HeaderComponent);

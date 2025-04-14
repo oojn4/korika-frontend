@@ -1,40 +1,18 @@
 import { Button, Collapse, Group, Pagination, Paper, Table, Text, MultiSelect, ActionIcon, TextInput } from '@mantine/core';
 import { IconChevronDown, IconChevronUp, IconSettings, IconColumns, IconSearch } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
-import { RawData } from '../../@types/dashboard';
+import { LeptoRawDataItem } from '../../@types/dashboard';
 
 type Props = {
-  data: RawData[];
+  data: LeptoRawDataItem[];
   rowsPerPage: number;
   monthYear: string;
 };
 
-// Define base data metrics (without change indicators)
+// Define base data metrics for DBD (different from Malaria)
 const BASE_METRICS = [
-  { value: 'tot_pos', label: 'Jumlah Kasus' },
-  { value: 'konfirmasi_lab_mikroskop', label: 'Konfirmasi Mikroskop' },
-  { value: 'konfirmasi_lab_rdt', label: 'Konfirmasi RDT' },
-  { value: 'konfirmasi_lab_pcr', label: 'Konfirmasi PCR' },
-  { value: 'pos_0_4', label: 'Kasus Usia 0-4' },
-  { value: 'pos_5_14', label: 'Kasus Usia 5-14' },
-  { value: 'pos_15_64', label: 'Kasus Usia 15-64' },
-  { value: 'pos_diatas_64', label: 'Kasus Usia >64' },
-  { value: 'hamil_pos', label: 'Kasus Ibu Hamil' },
-  { value: 'kematian_malaria', label: 'Kematian' },
-  { value: 'obat_standar', label: 'Obat Standar' },
-  { value: 'obat_nonprogram', label: 'Obat Non-Program' },
-  { value: 'obat_primaquin', label: 'Obat Primaquin' },
-  { value: 'p_pf', label: 'P. falciparum' },
-  { value: 'p_pv', label: 'P. vivax' },
-  { value: 'p_po', label: 'P. ovale' },
-  { value: 'p_pm', label: 'P. malariae' },
-  { value: 'p_pk', label: 'P. knowlesi' },
-  { value: 'p_mix', label: 'P. mix' },
-  { value: 'p_suspek_pk', label: 'Suspek P. knowlesi' },
-  { value: 'penularan_indigenus', label: 'Penularan Indigenus' },
-  { value: 'penularan_impor', label: 'Penularan Impor' },
-  { value: 'penularan_induced', label: 'Penularan Induced' },
-  { value: 'relaps', label: 'Relaps' }
+  { value: 'lep_k', label: 'Kasus Lepto' },
+  { value: 'lep_m', label: 'Kematian Lepto' }
 ];
 
 // Generate complete column list with base metrics and their change indicators
@@ -42,9 +20,8 @@ const AVAILABLE_COLUMNS = [
   { value: 'nama_faskes', label: 'Nama Faskes' },
   { value: 'province', label: 'Provinsi' },
   { value: 'city', label: 'Kabupaten/Kota' },
-  { value: 'district', label: 'Kecamatan' },
-  { value: 'tipe_faskes', label: 'Tipe Faskes' },
-  { value: 'owner', label: 'Pengelola' },
+  { value: 'kd_prov', label: 'Kode Provinsi' },
+  { value: 'kd_kab', label: 'Kode Kabupaten' },
   { value: 'status', label: 'Status' },
   // Add all base metrics
   ...BASE_METRICS,
@@ -95,23 +72,19 @@ const getCellColor = (value: any, column: string) => {
 // Helper function to determine text alignment
 const getTextAlignment = (column: string) => {
   if (column.includes('_change') || 
-      column === 'tot_pos' || 
-      column.startsWith('pos_') || 
-      column.startsWith('konfirmasi_') ||
-      column.startsWith('p_') ||
-      column === 'hamil_pos' ||
-      column === 'kematian_malaria') {
+      column === 'lep_k' || 
+      column === 'lep_m') {
     return 'right';
   }
   return 'left';
 };
 
-const TableRawData = ({ data, rowsPerPage, monthYear }: Props) => {
+const TableRawDataLepto = ({ data, rowsPerPage, monthYear }: Props) => {
   // State for table pagination
   const [activePage, setActivePage] = useState(1);
   
   // State for sorting
-  const [sortField, setSortField] = useState<string>('nama_faskes');
+  const [sortField, setSortField] = useState<string>('city');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   
   // State for table expand/collapse
@@ -119,13 +92,12 @@ const TableRawData = ({ data, rowsPerPage, monthYear }: Props) => {
   
   // State for column customization
   const [visibleColumns, setVisibleColumns] = useState<string[]>([
-    'nama_faskes',
     'province',
     'city',
-    'district',
-    'tot_pos',
-    'tot_pos_m_to_m_change',
-    'tot_pos_y_on_y_change',
+    'lep_k',
+    'lep_m',
+    'lep_k_m_to_m_change',
+    'lep_m_m_to_m_change',
     'status'
   ]);
   
@@ -135,14 +107,14 @@ const TableRawData = ({ data, rowsPerPage, monthYear }: Props) => {
   // State for configuration panel
   const [configOpen, setConfigOpen] = useState(false);
   
-  // NEW: State for search functionality
+  // State for search functionality
   const [searchTerm, setSearchTerm] = useState<string>('');
   
   // Sorting function
   const sortData = (field: string, direction: 'asc' | 'desc') => {
     return [...data].sort((a, b) => {
-      const valueA = a[field as keyof RawData] ?? 0; // Default to 0 if null or undefined
-      const valueB = b[field as keyof RawData] ?? 0;
+      const valueA = a[field as keyof LeptoRawDataItem] ?? 0; // Default to 0 if null or undefined
+      const valueB = b[field as keyof LeptoRawDataItem] ?? 0;
 
       if (direction === 'asc') {
         return valueA > valueB ? 1 : -1;
@@ -152,15 +124,15 @@ const TableRawData = ({ data, rowsPerPage, monthYear }: Props) => {
     });
   };
 
-  // NEW: Search function to filter data across all columns
-  const filterData = (dataToFilter: RawData[], term: string) => {
+  // Search function to filter data across all columns
+  const filterData = (dataToFilter: LeptoRawDataItem[], term: string) => {
     if (!term.trim()) return dataToFilter;
     
     return dataToFilter.filter(item => {
       // Check all properties of the item
       return Object.entries(item).some(([key, value]) => {
         // Skip non-displayable properties
-        if (key === 'id_faskes' || key === 'year' || key === 'month') return false;
+        if (key === 'year' || key === 'month') return false;
         
         // Handle null or undefined values
         if (value === null || value === undefined) return false;
@@ -194,13 +166,11 @@ const TableRawData = ({ data, rowsPerPage, monthYear }: Props) => {
   
   // Column sets for quick selection
   const columnSets = {
-    basic: ['nama_faskes', 'province', 'city', 'district', 'tot_pos', 'status'],
-    lab: ['nama_faskes', 'konfirmasi_lab_mikroskop', 'konfirmasi_lab_rdt', 'konfirmasi_lab_pcr', 'status'],
-    age: ['nama_faskes', 'pos_0_4', 'pos_5_14', 'pos_15_64', 'pos_diatas_64', 'status'],
-    parasites: ['nama_faskes', 'p_pf', 'p_pv', 'p_po', 'p_pm', 'p_pk', 'p_mix', 'status'],
-    obat: ['nama_faskes', 'obat_standar', 'obat_nonprogram', 'obat_primaquin', 'status'],
-    penularan: ['nama_faskes', 'penularan_indigenus', 'penularan_impor', 'penularan_induced', 'relaps', 'status'],
-    trends: ['nama_faskes', 'tot_pos', 'tot_pos_m_to_m_change', 'tot_pos_y_on_y_change', 'status']
+    basic: ['province', 'city', 'lep_k', 'lep_m', 'status'],
+    cases: ['province', 'city', 'lep_k', 'lep)k_m_to_m_change', 'lep_k_y_on_y_change', 'status'],
+    deaths: ['province', 'city', 'lep_m', 'lep_m_m_to_m_change', 'lep_m_y_on_y_change', 'status'],
+    all: ['province', 'city', 'lep_k', 'lep_m', 'lep_k_m_to_m_change', 'lep_m_m_to_m_change', 'lep_k_y_on_y_change', 'lep_m_y_on_y_change', 'status'],
+    codes: ['kd_prov', 'kd_kab', 'province', 'city', 'lep_k', 'lep_m', 'status']
   };
   
   // Function to apply a column set
@@ -216,11 +186,11 @@ const TableRawData = ({ data, rowsPerPage, monthYear }: Props) => {
   return (
     <Paper withBorder p="md" radius="md">
       <Group justify="space-between" align="flex-end" gap={0} mb="md">
-        <Text fz="xl" fw={700}>Tabel Raw Data Kasus Malaria Berdasarkan Faskes, {monthYear}</Text>
+        <Text fz="xl" fw={700}>Tabel Data Leptosirosis, {monthYear}</Text>
         <Group>
           <ActionIcon
             variant="light"
-            color="blue"
+            color="red"
             onClick={() => setConfigOpen((prev) => !prev)}
             title="Kustomisasi Tabel"
           >
@@ -234,7 +204,7 @@ const TableRawData = ({ data, rowsPerPage, monthYear }: Props) => {
 
       {/* Configuration Panel */}
       <Collapse in={configOpen}>
-        <Paper withBorder p="md" mb="md" radius="md" bg="gray.0">
+        <Paper withBorder p="md" mb="md" radius="md" bg="red.0">
           <Text fw={600} mb="xs">Kustomisasi Tampilan Tabel</Text>
           
           <Group mb="md">
@@ -243,23 +213,17 @@ const TableRawData = ({ data, rowsPerPage, monthYear }: Props) => {
               <Button variant="outline" size="xs" onClick={() => applyColumnSet('basic')}>
                 Dasar
               </Button>
-              <Button variant="outline" size="xs" onClick={() => applyColumnSet('lab')}>
-                Lab
+              <Button variant="outline" size="xs" onClick={() => applyColumnSet('cases')}>
+                Kasus
               </Button>
-              <Button variant="outline" size="xs" onClick={() => applyColumnSet('age')}>
-                Usia
+              <Button variant="outline" size="xs" onClick={() => applyColumnSet('deaths')}>
+                Kematian
               </Button>
-              <Button variant="outline" size="xs" onClick={() => applyColumnSet('parasites')}>
-                Parasit
+              <Button variant="outline" size="xs" onClick={() => applyColumnSet('all')}>
+                Semua
               </Button>
-              <Button variant="outline" size="xs" onClick={() => applyColumnSet('obat')}>
-                Obat
-              </Button>
-              <Button variant="outline" size="xs" onClick={() => applyColumnSet('penularan')}>
-                Penularan
-              </Button>
-              <Button variant="outline" size="xs" onClick={() => applyColumnSet('trends')}>
-                Trends
+              <Button variant="outline" size="xs" onClick={() => applyColumnSet('codes')}>
+                Dengan Kode
               </Button>
             </Group>
           </Group>
@@ -281,11 +245,11 @@ const TableRawData = ({ data, rowsPerPage, monthYear }: Props) => {
             
             <Button 
               variant={showComparisons ? "filled" : "outline"} 
-              color="blue" 
+              color="red" 
               onClick={() => setShowComparisons(!showComparisons)}
               style={{ marginBottom: "5px" }}
             >
-              {showComparisons ? "Sembunyikan Atribut Perbandingan (%)" : "Tampilkan Atribut Perbandingan  (%)"}
+              {showComparisons ? "Sembunyikan Perbandingan (%)" : "Tampilkan Perbandingan (%)"}
             </Button>
           </Group>
           
@@ -295,7 +259,7 @@ const TableRawData = ({ data, rowsPerPage, monthYear }: Props) => {
         </Paper>
       </Collapse>
 
-      {/* NEW: Search input field */}
+      {/* Search input field */}
       <Group mb="md">
         <TextInput
           placeholder="Cari di semua kolom..."
@@ -339,13 +303,13 @@ const TableRawData = ({ data, rowsPerPage, monthYear }: Props) => {
             </Table.Thead>
             <Table.Tbody>
               {paginatedData.length > 0 ? (
-                paginatedData.map((item) => (
-                  <Table.Tr key={`${item.id_faskes}-${item.year}-${item.month}`}>
+                paginatedData.map((item, index) => (
+                  <Table.Tr key={`${item.kd_prov}-${item.kd_kab}-${item.year}-${item.month}-${index}`}>
                     {visibleColumns.map((column) => (
                       <Table.Td
-                        key={`${item.id_faskes}-${column}`}
+                        key={`${item.kd_prov}-${item.kd_kab}-${column}-${index}`}
                         style={{
-                          color: getCellColor(item[column as keyof RawData], column),
+                          color: getCellColor(item[column as keyof LeptoRawDataItem], column),
                           textAlign: getTextAlignment(column) as any
                         }}
                       >
@@ -358,7 +322,7 @@ const TableRawData = ({ data, rowsPerPage, monthYear }: Props) => {
                             {item.status}
                           </Text>
                         ) : (
-                          formatValue(item[column as keyof RawData], column)
+                          formatValue(item[column as keyof LeptoRawDataItem], column)
                         )}
                       </Table.Td>
                     ))}
@@ -390,4 +354,4 @@ const TableRawData = ({ data, rowsPerPage, monthYear }: Props) => {
   );
 };
 
-export default TableRawData;
+export default TableRawDataLepto;
