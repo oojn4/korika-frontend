@@ -116,7 +116,6 @@ const MalariaPage = () => {
   const handleFetchEarlyWarning = async () => {
     try {
       const response = await DashboardService.indexWarningMalaria();
-      console.log(response)
       if (response.success) {
         setEarlyWarningData(response.data);
       }
@@ -774,7 +773,6 @@ const MalariaPage = () => {
     const cloudCoverStr = minCloudCover === maxCloudCover 
       ? `${Math.round(minCloudCover)}%` 
       : `${Math.round(minCloudCover)}% - ${Math.round(maxCloudCover)}%`;
-    
     // Create city representation with ranges or single values
     const cityData = {
       lokasi: weatherData.lokasi,
@@ -1196,8 +1194,8 @@ useEffect(() => {
     const year = parts[1];
     
     const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
     ];
     
     if (monthNum < 1 || monthNum > 12) {
@@ -2154,6 +2152,7 @@ useEffect(() => {
             minDate={new Date(2019, 0, 1)} // 0 = January in JavaScript Date
             maxDate={endDate || undefined}
           />
+          
 
           <MonthPickerInput 
             label="Periode Akhir"

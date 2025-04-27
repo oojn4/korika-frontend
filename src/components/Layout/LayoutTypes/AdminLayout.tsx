@@ -7,7 +7,7 @@ import HeaderComponent from '../../Header/Header'
 import SidebarComponent from '../../Sidebar/Sidebar'
 
 const AdminLayout = ({ isAuthenticated, user } : { isAuthenticated: boolean, user: User | null | undefined}) => {
-  useDocumentTitle(`Admin | ${appConfig.appName}`);
+  useDocumentTitle(`${appConfig.appName}`);
 
   return (
     <AppShell

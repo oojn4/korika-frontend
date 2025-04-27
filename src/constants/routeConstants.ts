@@ -35,12 +35,12 @@ export const ADMINROUTES: Routes = [
     path: '/user-management',
     element: lazy(() => import('../pages/Admin/UserManagement')),
   },
-  {
-    key: 'health-facility-management',
-    name: 'Health Facility Management',
-    path: '/health-facility-management',
-    element: lazy(() => import('../pages/Admin/HealthFacilityManagement')),
-  },
+  // {
+  //   key: 'health-facility-management',
+  //   name: 'Health Facility Management',
+  //   path: '/health-facility-management',
+  //   element: lazy(() => import('../pages/Admin/HealthFacilityManagement')),
+  // },
   // {
   //   key: 'mhfm-management',
   //   name: 'Malaria Health Facility Monthly Management',

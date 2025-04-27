@@ -673,8 +673,8 @@ const LeptoPage = () => {
     const year = parts[1];
     
     const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
     ];
     
     if (monthNum < 1 || monthNum > 12) {
@@ -936,7 +936,7 @@ const LeptoPage = () => {
   
     return (
       <>
-      <Paper withBorder p="md" radius="md" mb="md" bg="red.0">
+      <Paper withBorder p="md" radius="md" mb="md" bg="blue.0">
         <Group>
           <div>
             <Title order={4}>Indikator Kinerja Utama (KPI)</Title>
@@ -1022,7 +1022,7 @@ const LeptoPage = () => {
         
         <Space h="md" />
         
-        <Paper withBorder p="md" radius="md" my="md" bg="red.0">
+        <Paper withBorder p="md" radius="md" my="md" bg="orange.0">
           <Group>
             <div>
               <Title order={4}>Tren dan Prediksi Lepto</Title>

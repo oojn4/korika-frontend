@@ -10,7 +10,6 @@ export const DashboardService = {
       url: `${baseUrl}/get-aggregate-data-malaria?province=${province}&city=${city}&district=${district}&start=${start_month_year}&end=${end_month_year}`,
       method: 'GET',
     })
-    console.log(res.data);
     return res.data;
   },
   async indexRawDataMalaria(province : string, city: string,district: string, month_year : string, status: string): Promise<RawDataResponse> {

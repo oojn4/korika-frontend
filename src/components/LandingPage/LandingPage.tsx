@@ -105,7 +105,7 @@ const LandingPage = () => {
             </Group>
           </div>
           
-          <Image src={heroImage} alt="ClimateSmart Indonesia" className={classes.heroImage} />
+          <Image src={heroImage} alt="ClimateSmart Indonesia" className={classes.heroImage} width={50} />
         </div>
         
         {showCarousel && (

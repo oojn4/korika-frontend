@@ -672,8 +672,8 @@ const DBDPage = () => {
     const year = parts[1];
     
     const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
     ];
     
     if (monthNum < 1 || monthNum > 12) {
@@ -939,7 +939,7 @@ const DBDPage = () => {
   
     return (
       <>
-      <Paper withBorder p="md" radius="md" mb="md" bg="red.0">
+      <Paper withBorder p="md" radius="md" mb="md" bg="blue.0">
         <Group>
           <div>
             <Title order={4}>Indikator Kinerja Utama (KPI)</Title>
@@ -1025,7 +1025,7 @@ const DBDPage = () => {
         
         <Space h="md" />
         
-        <Paper withBorder p="md" radius="md" my="md" bg="red.0">
+        <Paper withBorder p="md" radius="md" my="md" bg="orange.0">
           <Group>
             <div>
               <Title order={4}>Tren dan Prediksi DBD</Title>
@@ -1170,6 +1170,7 @@ const DBDPage = () => {
               maxDate={endDate || undefined}
             />
             
+            
             <Button 
               variant="outline" 
               onClick={() => {
@@ -1272,6 +1273,7 @@ const DBDPage = () => {
             onChange={setStartDate}
             minDate={new Date(2019, 0, 1)} // 0 = January in JavaScript Date
             maxDate={endDate || undefined}
+            valueFormat='MM-YYYY'
           />
 
           <MonthPickerInput 

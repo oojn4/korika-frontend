@@ -1,23 +1,23 @@
 // EarlyWarningSystemMalaria.tsx
 import {
-    Accordion,
-    Alert,
-    Box,
-    Button,
-    Divider,
-    Group,
-    List,
-    Modal,
-    Stack,
-    Text,
-    ThemeIcon,
-    Title
+  Accordion,
+  Alert,
+  Box,
+  Button,
+  Divider,
+  Group,
+  List,
+  Modal,
+  Stack,
+  Text,
+  ThemeIcon,
+  Title
 } from '@mantine/core';
 import {
-    IconAlertTriangle,
-    IconArrowRight,
-    IconCheck,
-    IconInfoCircle
+  IconAlertTriangle,
+  IconArrowRight,
+  IconCheck,
+  IconInfoCircle
 } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { DataMalaria, EarlyWarningSystemMalariaProps, Peringatan } from '../../@types/dashboard';
@@ -45,8 +45,6 @@ export const EarlyWarningSystemMalaria = ({
   useEffect(() => {
     // Memeriksa peringatan berdasarkan data yang disediakan
     const peringatanBaru = deteksiPeringatan(data,latestActualMonthYear);
-    console.log('Peringatan baru:', peringatanBaru);
-    console.log('Data:', data);
     setPeringatan(peringatanBaru);
   }, [data]);
 
@@ -79,7 +77,6 @@ export const EarlyWarningSystemMalaria = ({
   
     // Parse latest actual month/year
     const [bulanTerakhir, tahunTerakhir] = latestActualMonthYear.split('-').map(Number);
-    console.log('Bulan dan tahun terakhir:', bulanTerakhir, tahunTerakhir);
     // Buat tanggal referensi dari bulan/tahun data aktual terakhir
     const tanggalReferensi = new Date(tahunTerakhir, bulanTerakhir - 1, 1); // bulan adalah 0-indexed dalam JS Date
     
@@ -102,7 +99,6 @@ export const EarlyWarningSystemMalaria = ({
   
     // Terapkan aturan peringatan malaria berdasarkan status endemis
     dataPrediksi.forEach(item => {
-        console.log(item)
       const namaBulan = [
         "Januari", "Februari", "Maret", "April", "Mei", "Juni",
         "Juli", "Agustus", "September", "Oktober", "November", "Desember"
@@ -369,8 +365,8 @@ export const EarlyWarningSystemMalaria = ({
               <Text size="sm">
                 {warning.bulan} {warning.tahun}: {warning.metrik} di {warning.lokasi}  
                 {warning.tipe === 'fatality' 
-                  ? ` diprediksi sebesar ${warning.nilai.toFixed(2)} kasus yang mana mengalami peningkatan sebesar ${warning.mtom !== null ? warning.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (Status Endemis: ${warning.status_endemis}%)`
-                  : ` diprediksi sebesar ${warning.nilai} kasus yang mana mengalami peningkatan sebesar ${warning.mtom !== null ? warning.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (Status Endemis: ${warning.status_endemis} )`}
+                  ? ` mengalami peningkatan sebesar ${warning.mtom !== null ? warning.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (${warning.status_endemis})`
+                  : ` mengalami peningkatan sebesar ${warning.mtom !== null ? warning.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (${warning.status_endemis})`}
               </Text>
             </Group>
             
@@ -397,8 +393,8 @@ export const EarlyWarningSystemMalaria = ({
               <Text size="sm">
                 {warning.bulan} {warning.tahun}: {warning.metrik} di {warning.lokasi} 
                 {warning.tipe === 'fatality' 
-                  ? ` diprediksi sebesar ${warning.nilai.toFixed(2)} kasus yang mana mengalami peningkatan sebesar ${warning.mtom !== null ? warning.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (Status Endemis: ${warning.status_endemis}%)`
-                  : ` diprediksi sebesar ${warning.nilai} kasus yang mana mengalami peningkatan sebesar ${warning.mtom !== null ? warning.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (Status Endemis: ${warning.status_endemis} )`}
+                  ? ` mengalami peningkatan sebesar ${warning.mtom !== null ? warning.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (${warning.status_endemis})`
+                  : ` mengalami peningkatan sebesar ${warning.mtom !== null ? warning.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (${warning.status_endemis} )`}
               </Text>
             </Group>
             
@@ -445,8 +441,8 @@ export const EarlyWarningSystemMalaria = ({
             <Text fw={500}>
               {peringatanTerpilih.bulan} {peringatanTerpilih.tahun}: {peringatanTerpilih.metrik} di {peringatanTerpilih.lokasi} 
               {peringatanTerpilih.tipe === 'fatality' 
-                  ? ` diprediksi sebesar ${peringatanTerpilih.nilai.toFixed(2)} kasus yang mana mengalami peningkatan sebesar ${peringatanTerpilih.mtom !== null ? peringatanTerpilih.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (Status Endemis: ${peringatanTerpilih.status_endemis}%)`
-                  : ` diprediksi sebesar ${peringatanTerpilih.nilai} kasus yang mana mengalami peningkatan sebesar ${peringatanTerpilih.mtom !== null ? peringatanTerpilih.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (Status Endemis: ${peringatanTerpilih.status_endemis} )`}            </Text>
+                  ? ` mengalami peningkatan sebesar ${peringatanTerpilih.mtom !== null ? peringatanTerpilih.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (${peringatanTerpilih.status_endemis})`
+                  : ` mengalami peningkatan sebesar ${peringatanTerpilih.mtom !== null ? peringatanTerpilih.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (${peringatanTerpilih.status_endemis})`}            </Text>
           </Alert>
           
           {renderRekomendasi()}

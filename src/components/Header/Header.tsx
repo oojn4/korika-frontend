@@ -47,7 +47,7 @@ const HeaderComponent = () => {
           <Image
             src={heroImage}
             alt="ClimateSmart Indonesia"
-            height={60}
+            height={30}
             className={classes.heroImage}
             onClick={handleClickedLogo}
             style={{ cursor: 'pointer' }}
