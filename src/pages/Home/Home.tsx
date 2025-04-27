@@ -1,13 +1,11 @@
 import { useDocumentTitle } from '@mantine/hooks';
-import Footer from '../../components/Footer/Footer';
-import IntroDashboard from '../../components/IntroDashboard/IntroDashboard';
+import LandingPage from '../../components/LandingPage/LandingPage';
 
 const HomePage = () => {
-  useDocumentTitle('Climate Smart Indonesia')
+  useDocumentTitle('ClimateSmart Indonesia')
   return (
     <>
-      <IntroDashboard />
-      <Footer />
+      <LandingPage />
     </>
   );
 }

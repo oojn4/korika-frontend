@@ -1,10 +1,8 @@
 // src/components/MapVisualization/components/ProvinceMapLepto.tsx
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import mapboxgl, { Map as MapboxMap, Popup } from 'mapbox-gl';
-import { geoJsonUrls } from '../utils/mapUtilsLepto';
-import { metricOptionsLepto } from '../utils/mapUtilsLepto';
-import { getColorForValue } from '../utils/mapUtilsLepto';
 import _ from 'lodash';
+import mapboxgl, { Map as MapboxMap, Popup } from 'mapbox-gl';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { geoJsonUrls, getColorForValue, metricOptionsLepto } from '../utils/mapUtilsLepto';
 
 interface AggregatedLeptoGeoData {
   kd_prov: string;
@@ -323,7 +321,7 @@ const ProvinceMapLepto: React.FC<ProvinceMapLeptoProps> = ({ aggregatedData, met
               <strong>Kasus Lepto:</strong> ${provinceData.lep_k || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
-              <strong>Kematian Lepto:</strong> ${provinceData.lep_m || 0} kasus
+              <strong>Kematian dengan Lepto:</strong> ${provinceData.lep_m || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
               <strong>CFR:</strong> ${cfr}%
@@ -461,7 +459,7 @@ const ProvinceMapLepto: React.FC<ProvinceMapLeptoProps> = ({ aggregatedData, met
               <strong>Kasus Lepto:</strong> ${currentTooltipData.provinceData.lep_k || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
-              <strong>Kematian Lepto:</strong> ${currentTooltipData.provinceData.lep_m || 0} kasus
+              <strong>Kematian dengan Lepto:</strong> ${currentTooltipData.provinceData.lep_m || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
               <strong>CFR:</strong> ${cfr}%

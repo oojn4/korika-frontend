@@ -1,5 +1,5 @@
-import { Button, Collapse, Group, Pagination, Paper, Table, Text, MultiSelect, ActionIcon, TextInput } from '@mantine/core';
-import { IconChevronDown, IconChevronUp, IconSettings, IconColumns, IconSearch } from '@tabler/icons-react';
+import { ActionIcon, Button, Collapse, Group, MultiSelect, Pagination, Paper, Table, Text, TextInput } from '@mantine/core';
+import { IconChevronDown, IconChevronUp, IconColumns, IconSearch, IconSettings } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { RawData } from '../../@types/dashboard';
 
@@ -11,7 +11,7 @@ type Props = {
 
 // Define base data metrics (without change indicators)
 const BASE_METRICS = [
-  { value: 'tot_pos', label: 'Jumlah Kasus' },
+  { value: 'tot_pos', label: 'Total Kasus' },
   { value: 'konfirmasi_lab_mikroskop', label: 'Konfirmasi Mikroskop' },
   { value: 'konfirmasi_lab_rdt', label: 'Konfirmasi RDT' },
   { value: 'konfirmasi_lab_pcr', label: 'Konfirmasi PCR' },
@@ -20,17 +20,18 @@ const BASE_METRICS = [
   { value: 'pos_15_64', label: 'Kasus Usia 15-64' },
   { value: 'pos_diatas_64', label: 'Kasus Usia >64' },
   { value: 'hamil_pos', label: 'Kasus Ibu Hamil' },
-  { value: 'kematian_malaria', label: 'Kematian' },
-  { value: 'obat_standar', label: 'Obat Standar' },
-  { value: 'obat_nonprogram', label: 'Obat Non-Program' },
-  { value: 'obat_primaquin', label: 'Obat Primaquin' },
+  { value: 'kematian_malaria', label: 'Kematian dengan Malaria' },
+  // { value: 'obat_standar', label: 'Obat Standar' },
+  // { value: 'obat_nonprogram', label: 'Obat Non-Program' },
+  // { value: 'obat_primaquin', label: 'Obat Primaquin' },
   { value: 'p_pf', label: 'P. falciparum' },
   { value: 'p_pv', label: 'P. vivax' },
-  { value: 'p_po', label: 'P. ovale' },
-  { value: 'p_pm', label: 'P. malariae' },
-  { value: 'p_pk', label: 'P. knowlesi' },
+  // { value: 'p_po', label: 'P. ovale' },
+  // { value: 'p_pm', label: 'P. malariae' },
+  // { value: 'p_pk', label: 'P. knowlesi' },
   { value: 'p_mix', label: 'P. mix' },
-  { value: 'p_suspek_pk', label: 'Suspek P. knowlesi' },
+  // { value: 'p_suspek_pk', label: 'Suspek P. knowlesi' },
+  { value: 'p_others', label: 'Parasit Lainnya' },
   { value: 'penularan_indigenus', label: 'Penularan Indigenus' },
   { value: 'penularan_impor', label: 'Penularan Impor' },
   { value: 'penularan_induced', label: 'Penularan Induced' },
@@ -197,7 +198,7 @@ const TableRawData = ({ data, rowsPerPage, monthYear }: Props) => {
     basic: ['nama_faskes', 'province', 'city', 'district', 'tot_pos', 'status'],
     lab: ['nama_faskes', 'konfirmasi_lab_mikroskop', 'konfirmasi_lab_rdt', 'konfirmasi_lab_pcr', 'status'],
     age: ['nama_faskes', 'pos_0_4', 'pos_5_14', 'pos_15_64', 'pos_diatas_64', 'status'],
-    parasites: ['nama_faskes', 'p_pf', 'p_pv', 'p_po', 'p_pm', 'p_pk', 'p_mix', 'status'],
+    parasites: ['nama_faskes', 'p_pf', 'p_pv', 'p_mix', 'p_others','status'],
     obat: ['nama_faskes', 'obat_standar', 'obat_nonprogram', 'obat_primaquin', 'status'],
     penularan: ['nama_faskes', 'penularan_indigenus', 'penularan_impor', 'penularan_induced', 'relaps', 'status'],
     trends: ['nama_faskes', 'tot_pos', 'tot_pos_m_to_m_change', 'tot_pos_y_on_y_change', 'status']

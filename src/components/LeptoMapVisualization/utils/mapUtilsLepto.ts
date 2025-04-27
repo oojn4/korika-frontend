@@ -3,7 +3,7 @@
 // Metric options for DBD data
 export const metricOptionsLepto = [
   { value: 'lep_k', label: 'Kasus Lepto' },
-  { value: 'lep_m', label: 'Kematian Lepto' },
+  { value: 'lep_m', label: 'Kematian dengan Lepto' },
   // { value: 'dbd_p_m_to_m_change', label: 'Perubahan Kasus M-to-M (%)' },
   // { value: 'dbd_m_m_to_m_change', label: 'Perubahan Kematian M-to-M (%)' },
   // { value: 'dbd_p_y_on_y_change', label: 'Perubahan Kasus Y-on-Y (%)' },

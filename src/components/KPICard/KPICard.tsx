@@ -1,5 +1,5 @@
+import { Group, Paper, Text, ThemeIcon } from '@mantine/core';
 import React from 'react';
-import { Paper, Text, Group, ThemeIcon, Badge } from '@mantine/core';
 
 /**
  * KPICard Component - Displays a key performance indicator in a card format
@@ -27,9 +27,6 @@ const KPICard = ({
         <Text size="xs" color="dimmed" >
           {title}
         </Text>
-        <Badge size="xs" color='blue'mt={4}>
-            Data Aktual
-        </Badge>
         
         <ThemeIcon
           color={color}

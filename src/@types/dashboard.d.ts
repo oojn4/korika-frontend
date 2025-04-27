@@ -203,6 +203,7 @@ export interface AggregatedGeoData {
   p_pk: number;
   p_mix: number;
   p_suspek_pk: number;
+  p_others: number;
   penularan_indigenus: number;
   penularan_impor: number;
   penularan_induced: number;
@@ -422,4 +423,45 @@ export interface LeptoRawDataResponse {
     };
   };
   success: boolean;
+}
+interface Peringatan {
+  id: string;
+  tipe: 'indigenous' | 'total' | 'fatality';
+  lokasi: string;
+  bulan: string;
+  tahun: number;
+  metrik: string;
+  nilai: number;
+  mtom: number | null;
+  // ambang_batas: number;
+  // tingkat_keparahan: 'tinggi' | 'sedang' | 'rendah';
+  
+  status_endemis: string;
+}
+
+// Mendefinisikan struktur untuk data API
+interface DataMalaria {
+  month: number;
+  year: number;
+  status: string;
+  kd_kab: string;
+  kd_prov: string;
+  province: string;
+  city: string;
+  predicted_tot_pos: number;
+  predicted_kematian_malaria: number;
+  predicted_penularan_indigenus: number;
+  status_endemis: string;
+  predicted_penularan_indigenus_m_to_m_change: number | null;
+  [key: string]: any; // Untuk field tambahan lainnya
+}
+interface EarlyWarningSystemMalariaResponse {
+  
+  data: DataMalaria[];
+  success: boolean;
+}
+// Props untuk komponen EarlyWarningSystemMalaria
+interface EarlyWarningSystemMalariaProps {
+  data: DataMalaria[];
+  latestActualMonthYear: string;
 }

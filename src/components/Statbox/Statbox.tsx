@@ -1,15 +1,10 @@
 import { LineChart } from '@mantine/charts';
 import { Box, Button, Collapse, Group, Modal, Paper, SimpleGrid, Space, Text } from '@mantine/core';
-import { Icon, IconChevronDown, IconChevronUp, IconProps } from '@tabler/icons-react';
-import { ForwardRefExoticComponent, RefAttributes, useState } from 'react';
+import { IconChevronDown, IconChevronUp, IconProps } from '@tabler/icons-react';
+import { useState } from 'react';
 import classes from './Statbox.module.css';
 
-interface TablerIconProps
-  extends Partial<
-    ForwardRefExoticComponent<
-      Omit<IconProps, "ref"> & RefAttributes<Icon>
-    >
-  > {
+interface TablerIconProps extends Partial<Omit<IconProps, "ref">> {
   size?: string | number;
   stroke?: string | number;
   strokeWidth?: string | number;
@@ -20,6 +15,7 @@ interface SeriesItem {
   name: string;
   color: string;
   lineHidden?: boolean;
+  yAxisId?: 'left' | 'right'; // Add property for dual axis support
 }
 
 interface StatboxProps {
@@ -30,7 +26,10 @@ interface StatboxProps {
   dataKey: string;
   series: SeriesItem[];
   isCollapsible?: boolean;
-  filterComponent?: React.ReactNode; // New prop for filter component
+  filterComponent?: React.ReactNode;
+  useDualAxis?: boolean; // New prop to enable dual Y-axis
+  rightAxisLabel?: string; // Label for the right axis
+  leftAxisLabel?: string;  // Label for the left axis
 }
 
 interface ChartTooltipProps {
@@ -109,6 +108,11 @@ function ChartTooltip({ label, payload }: ChartTooltipProps) {
             // Determine color based on data type
             const textColor = item.type === 'predicted' ? 'gray' : item.color;
             
+            // Round the value to 2 decimal places if it's a number
+            const displayValue = typeof item.value === 'number' 
+              ? Number(item.value).toFixed(2)
+              : item.value;
+            
             return (
               <Text 
                 key={`${item.name}-${item.type}`} 
@@ -117,7 +121,7 @@ function ChartTooltip({ label, payload }: ChartTooltipProps) {
                 lh="1.2"
                 pl={8}
               >
-                {item.value} {item.type === 'predicted' && <Text span size="xs" c="dimmed">(predicted)</Text>}
+                {displayValue} {item.type === 'predicted' && <Text span size="xs" c="dimmed">(predicted)</Text>}
               </Text>
             );
           })}
@@ -135,7 +139,10 @@ const Statbox: React.FC<StatboxProps> = ({
   dataKey,
   series,
   isCollapsible = true,
-  filterComponent, // New prop
+  filterComponent,
+  useDualAxis = false,
+  rightAxisLabel = '',
+  leftAxisLabel = '',
 }) => {
   const [opened, setOpened] = useState(true);
   const [isModalOpen, setModalOpen] = useState(false);
@@ -188,21 +195,84 @@ const Statbox: React.FC<StatboxProps> = ({
     </Box>
   ));
   
-  const getMaxYValue = () => {
+  // Function to get max Y value for the left axis
+  const getMaxYValueLeft = () => {
     let max = 0;
   
     data.forEach((item) => {
-      visibleSeries.forEach((s) => {
-        const val = Number(item[s.name]);
-        if (!isNaN(val) && val > max) {
-          max = val;
-        }
-      });
+      visibleSeries
+        .filter(s => !s.yAxisId || s.yAxisId === 'left')
+        .forEach((s) => {
+          const val = Number(item[s.name]);
+          if (!isNaN(val) && val > max) {
+            max = val;
+          }
+        });
     });
   
     return Math.ceil(max * 1.05); // Add 5% buffer
   };
   
+  // Function to get max Y value for the right axis
+  const getMaxYValueRight = () => {
+    let max = 0;
+  
+    data.forEach((item) => {
+      visibleSeries
+        .filter(s => s.yAxisId === 'right')
+        .forEach((s) => {
+          const val = Number(item[s.name]);
+          if (!isNaN(val) && val > max) {
+            max = val;
+          }
+        });
+    });
+  
+    // If no right axis values or all are zero, return a default
+    return max === 0 ? 100 : Math.ceil(max * 1.05); // Add 5% buffer
+  };
+    // Function to get max Y value for the left axis
+    const getMinYValueLeft = () => {
+      let min = 0;
+    
+      data.forEach((item) => {
+        visibleSeries
+          .filter(s => !s.yAxisId || s.yAxisId === 'left')
+          .forEach((s) => {
+            const val = Number(item[s.name]);
+            if (!isNaN(val) && val < min) {
+              min = val;
+            }
+          });
+      });
+    
+      return Math.ceil(min - min*0.05); // Add 5% buffer
+    };
+  const getMinYValueRight = () => {
+      let min = 0;
+    
+      data.forEach((item) => {
+        visibleSeries
+          .filter(s => s.yAxisId === 'right')
+          .forEach((s) => {
+            const val = Number(item[s.name]);
+            if (!isNaN(val) && val < min) {
+              min = val;
+            }
+          });
+      });
+    
+      // If no right axis values or all are zero, return a default
+      return min === 0 ? 100 : Math.ceil(min - min*0.05); // Add 5% buffer
+    };
+    
+  
+  // Create the series configuration for the chart
+  const chartSeries = visibleSeries.map(s => ({
+    ...s,
+    yAxisId: useDualAxis ? (s.yAxisId || 'left') : undefined // Only add yAxisId when dual axis is enabled
+  }));
+
   return (
     <Paper withBorder p="md" radius="md">
       <Group justify="space-between">
@@ -224,7 +294,6 @@ const Statbox: React.FC<StatboxProps> = ({
       </Group>
 
       <Collapse in={opened}>
-        {/* Include the filter component if provided */}
         {filterComponent && (
           <>
             {filterComponent}
@@ -236,7 +305,7 @@ const Statbox: React.FC<StatboxProps> = ({
           h={300}
           data={data}
           dataKey={dataKey}
-          series={visibleSeries}
+          series={chartSeries}
           curveType="linear"
           onClick={handleChartClick}
           tooltipProps={{
@@ -244,15 +313,28 @@ const Statbox: React.FC<StatboxProps> = ({
           }}
           withXAxis
           withLegend={false}
+          withRightYAxis={useDualAxis} // Add this line to enable the right Y-axis
+          yAxisLabel={leftAxisLabel}
+          rightYAxisLabel={rightAxisLabel}
           yAxisProps={{
-            domain: [0, getMaxYValue()],
+            domain: [getMinYValueLeft().toFixed(2), getMaxYValueLeft().toFixed(2)],
             tickCount: 6,
+            orientation: 'left',
+            tickFormatter: (value: number) => value % 1 === 0 ? `${value}` : `${value.toFixed(2)}`
           }}
+          rightYAxisProps={useDualAxis ? {
+            domain: [getMinYValueRight().toFixed(2), getMaxYValueRight().toFixed(2)],
+            tickCount: 6,
+            orientation: 'right',
+            stroke: '#777', // Add explicit stroke color
+            axisLine: true, // Ensure the axis line is visible
+            tickLine: true,  // Ensure tick lines are visible
+            tickFormatter: (value: number) => value % 1 === 0 ? `${value}` : `${value.toFixed(2)}`
+          } : undefined}
         />
         
         <Space h="xs" />
         
-        {/* Modal for enlarged chart */}
         <Modal
             opened={isModalOpen}
             onClose={handleCloseModal}
@@ -263,13 +345,26 @@ const Statbox: React.FC<StatboxProps> = ({
               h={600}
               data={data}
               dataKey={dataKey}
-              series={visibleSeries}
+              series={chartSeries}
               curveType="linear"
-              withLegend={false}
+              withLegend={true}
+              withRightYAxis={useDualAxis} // Add this line for the modal chart
+              yAxisLabel={leftAxisLabel}
+              rightYAxisLabel={rightAxisLabel}
               yAxisProps={{
-                domain: [0, getMaxYValue()],
-                tickCount: 8,
+                domain: [getMinYValueLeft().toFixed(2), getMaxYValueLeft().toFixed(2)],
+                tickCount: 6,
+                tickFormatter: (value: number) => `${value.toFixed(2)}`
               }}
+              rightYAxisProps={useDualAxis ? {
+                domain: [getMinYValueRight().toFixed(2), getMaxYValueRight().toFixed(2)],
+                tickCount: 6,
+                orientation: 'right',
+                stroke: '#777',
+                axisLine: true,
+                tickLine: true,
+                tickFormatter: (value: number) => `${value.toFixed(2)}`
+              } : undefined}
             />
             <Space h="md" />
         </Modal>

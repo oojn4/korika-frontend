@@ -1,17 +1,17 @@
 // src/components/MapVisualization/EnhancedMapVisualizationDBD.tsx
-import React, { useRef, useState } from 'react';
-import { Button, Collapse, Group, Paper, Text, Tabs, Select, SimpleGrid, Space } from '@mantine/core';
+import { Button, Collapse, Group, Paper, Select, SimpleGrid, Space, Tabs, Text } from '@mantine/core';
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import React, { useRef, useState } from 'react';
 import { DBDRawDataItem } from '../../@types/dashboard';
 import useDataAggregationDBD from './hooks/useDataAggregationDBD';
 import { metricOptionsDBD } from './utils/mapUtilsDBD';
 
 // Import map components
-import ProvinceMapDBD from './components/ProvinceMapDBD';
-import CityMapDBD from './components/CityMapDBD';
 import MapLegendDBD from '../MapLegend/MapLegend';
+import CityMapDBD from './components/CityMapDBD';
+import ProvinceMapDBD from './components/ProvinceMapDBD';
 
 // Set Mapbox token
 mapboxgl.accessToken = 'pk.eyJ1IjoiZmF1emFuZmFsZHkiLCJhIjoiY20yYmF0MG94MG1oYjJrcXhkMWo4dGh4eCJ9.X0AVMmOyRm1Q8ObMiqL7VA';
@@ -62,7 +62,7 @@ const EnhancedMapVisualizationDBD: React.FC<EnhancedMapVisualizationDBDProps> = 
   // Get label for selected metric
   const getMetricLabel = () => {
     const selectedMetric = metricOptionsDBD.find(m => m.value === metricToShow);
-    return selectedMetric ? selectedMetric.label : 'Jumlah Kasus DBD';
+    return selectedMetric ? selectedMetric.label : 'Total Kasus DBD';
   };
   
 

@@ -1,19 +1,19 @@
 // src/components/MapVisualization/EnhancedMapVisualization.tsx
-import React, { useEffect, useRef, useState } from 'react';
-import { Button, Collapse, Group, Paper, Text, Tabs, Select, SimpleGrid, Space } from '@mantine/core';
+import { Button, Collapse, Group, Paper, Select, SimpleGrid, Space, Tabs, Text } from '@mantine/core';
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import React, { useEffect, useRef, useState } from 'react';
 import { RawData } from '../../@types/dashboard';
 import useDataAggregation from './hooks/useDataAggregation';
 import { metricOptions } from './utils/mapUtils';
 
 // Import map components
-import FaskesMap from './components/FaskesMap';
-import ProvinceMap from './components/ProvinceMap';
+import MapLegend from '../MapLegend/MapLegend';
 import CityMap from './components/CityMap';
 import DistrictMap from './components/DistrictMap';
-import MapLegend from '../MapLegend/MapLegend';
+import FaskesMap from './components/FaskesMap';
+import ProvinceMap from './components/ProvinceMap';
 
 // Set Mapbox token
 mapboxgl.accessToken = 'pk.eyJ1IjoiZmF1emFuZmFsZHkiLCJhIjoiY20yYmF0MG94MG1oYjJrcXhkMWo4dGh4eCJ9.X0AVMmOyRm1Q8ObMiqL7VA';
@@ -61,7 +61,7 @@ const EnhancedMapVisualization: React.FC<EnhancedMapVisualizationProps> = ({ dat
       <Paper withBorder p="md" radius="md">
         <Group justify="space-between" align="flex-end" gap={0} mb="md">
           <Text fz="xl" fw={700}>
-            Sebaran {metricOptions.find(m => m.value === metricToShow)?.label || 'Jumlah Kasus'} Malaria, {predictedMonthYear}
+            Sebaran {metricOptions.find(m => m.value === metricToShow)?.label || 'Total Kasus'} Malaria, {predictedMonthYear}
           </Text>
           <Button variant="subtle" onClick={() => setTableOpen((prev) => !prev)}>
             {tableOpen ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}

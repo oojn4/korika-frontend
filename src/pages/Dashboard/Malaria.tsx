@@ -1,16 +1,17 @@
-import { Select, SimpleGrid, Space, Text, Title, Box, Paper, Group, Button, Tabs, ThemeIcon, Badge, ActionIcon } from '@mantine/core';
+import { ActionIcon, Badge, Box, Button, Group, Paper, Select, SimpleGrid, Space, Tabs, Text, ThemeIcon, Title } from '@mantine/core';
 import { MonthPickerInput } from '@mantine/dates';
-import { IconArticle, IconDashboard, IconMap, IconTable, IconCloud, IconAlertCircle, IconHeartPlus, IconMedicalCross, IconBabyCarriage, IconInfoCircle, IconChartLine } from '@tabler/icons-react';
+import { IconAlertCircle, IconArticle, IconBabyCarriage, IconChartLine, IconCloud, IconDashboard, IconHeartPlus, IconMap, IconMedicalCross, IconTable } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
-import { AggregateData, AggregateDataResponse, BMKGWeatherResponse, Master, RawDataResponse } from '../../@types/dashboard';
+import { AggregateData, AggregateDataResponse, BMKGWeatherResponse, DataMalaria, Master, RawDataResponse } from '../../@types/dashboard';
+import EarlyWarningSystemMalaria from '../../components/EarlyWarningSystemMalaria/EarlyWarningSystemMalaria';
+import KPICard from '../../components/KPICard/KPICard'; // Assumed new component
+import EnhancedMapVisualization from '../../components/MapVisualization/EnhancedMapVisualization';
 import Statbox from '../../components/Statbox/Statbox';
 import TableRawData from '../../components/TableRawData/TableRawData';
+import WeatherWidget from '../../components/WeatherWidget/WeatherWidget';
 import { DashboardService } from '../../services/services/dashboard.service';
 import { WeatherService } from '../../services/services/weather.service'; // Assumed new service
 import classes from './Dashboard.module.css';
-import EnhancedMapVisualization from '../../components/MapVisualization/EnhancedMapVisualization';
-import KPICard from '../../components/KPICard/KPICard'; // Assumed new component
-import WeatherWidget from '../../components/WeatherWidget/WeatherWidget';
 
 type ComboboxItem = {
   value: String;
@@ -51,6 +52,7 @@ const MalariaPage = () => {
   const [monthYear, setMonthYear] = useState<string>('');
   const [predictedMonthYear, setPredictedMonthYear] = useState<string>('');
   const [textStatbox, setTextStatbox] = useState<TextStatBox[]>([]);
+  const [earlyWarningData,setEarlyWarningData] = useState<DataMalaria[]>([])
   
   // Date Picker States
   const [startDate, setStartDate] = useState<Date | null>(null);
@@ -111,9 +113,19 @@ const MalariaPage = () => {
     return district ? district.bmkgCode : districtCode;
   };
 
-  // Toggle weather widget
-  // Function to fetch provinces list
-  // Replace your existing handleFetchProvinces function with this
+  const handleFetchEarlyWarning = async () => {
+    try {
+      const response = await DashboardService.indexWarningMalaria();
+      console.log(response)
+      if (response.success) {
+        setEarlyWarningData(response.data);
+      }
+      } catch (error) {
+      return;
+    }
+  };
+  
+
   const handleFetchProvinces = async () => {
     try {
       const response = await DashboardService.fetchProvinces();
@@ -993,6 +1005,9 @@ const MalariaPage = () => {
     
     return districtData;
   };
+  useEffect(() => {
+    handleFetchEarlyWarning();
+  }, [earlyWarningData]);
 // Effect untuk handle perubahan filter
 useEffect(() => {
   if (province && province !== '00') {
@@ -1427,16 +1442,20 @@ useEffect(() => {
             <Text size="sm" color="dimmed">
               Data aktual terakhir: {formattedLastUpdateDate}
             </Text>
+            
           </div>
-          <ActionIcon
-            variant="light"
-            color="blue"
-            radius="xl"
-            size="lg"
-            title="Informasi KPI"
+          <Badge 
+            size="lg" 
+            color="blue" 
+            radius="sm"
+            leftSection={
+              <ThemeIcon color="blue" size={14} radius="xl" variant="filled">
+                <IconChartLine size={8} />
+              </ThemeIcon>
+            }
           >
-            <IconInfoCircle size={20} />
-          </ActionIcon>
+            Data Aktual
+          </Badge>
         </Group>
       </Paper>
       <SimpleGrid cols={{ base: 2, xs: 3, md: 5 }} spacing="md">
@@ -1569,18 +1588,21 @@ useEffect(() => {
         <SimpleGrid cols={{ base: 1, xs: 2, md: 2 }}>
           <Box>
             <Statbox
-              title="Konfirmasi Lab"
+              title="Total Kasus Malaria Berdasarkan Pemeriksaan"
               icon={IconArticle}
               data={getChartData()}
               textStatbox={textStatbox}
               dataKey="monthYear"
               series={[
                 { name: 'predicted_konfirmasi_lab_mikroskop', color: 'grey' },
-                { name: 'actual_konfirmasi_lab_mikroskop', color: 'indigo.6' },
                 { name: 'predicted_konfirmasi_lab_rdt', color: 'grey' },
-                { name: 'actual_konfirmasi_lab_rdt', color: 'blue.6' },
                 { name: 'predicted_konfirmasi_lab_pcr', color: 'grey' },
+                { name: 'predicted_tot_pos', color: 'grey' },
+                
+                { name: 'actual_konfirmasi_lab_mikroskop', color: 'indigo.6' },
+                { name: 'actual_konfirmasi_lab_rdt', color: 'blue.6' },
                 { name: 'actual_konfirmasi_lab_pcr', color: 'teal.6' },
+                { name: 'actual_tot_pos', color: 'red.6' },
               ]}
               isCollapsible
             />
@@ -1588,7 +1610,7 @@ useEffect(() => {
           
           <Box>
             <Statbox
-              title="Kelompok Umur"
+              title="Total Kasus Malaria Berdasarkan Kelompok Umur"
               icon={IconArticle}
               data={getChartData()}
               textStatbox={textStatbox}
@@ -1598,10 +1620,12 @@ useEffect(() => {
                 { name: 'predicted_pos_5_14', color: 'grey' },
                 { name: 'predicted_pos_15_64', color: 'grey' },
                 { name: 'predicted_pos_diatas_64', color: 'grey' },
+                { name: 'predicted_tot_pos', color: 'grey' },
                 { name: 'actual_pos_0_4', color: '#FFC1CC' },
                 { name: 'actual_pos_5_14', color: '#87CEEB' },
                 { name: 'actual_pos_15_64', color: '#50C878' },
                 { name: 'actual_pos_diatas_64', color: '#E6E6FA' },
+                { name: 'actual_tot_pos', color: 'red.6' },
               ]}
               isCollapsible
             />
@@ -1613,22 +1637,44 @@ useEffect(() => {
         <SimpleGrid cols={{ base: 1, xs: 2, md: 2 }}>
           <Box>
             <Statbox
-              title="Ibu Hamil dan Kematian"
+              title="Total Kasus Malaria dan Ibu Hamil dengan Malaria"
               icon={IconArticle}
               data={getChartData()}
               textStatbox={textStatbox}
               dataKey="monthYear"
               series={[
-                { name: 'predicted_hamil_pos', color: 'grey' },
-                { name: 'predicted_kematian_malaria', color: 'grey' },
-                { name: 'actual_hamil_pos', color: 'blue.6' },
-                { name: 'actual_kematian_malaria', color: 'teal.6' },
+                { name: 'predicted_hamil_pos', color: 'grey',yAxisId:'right' },
+                { name: 'predicted_tot_pos', color: 'grey',yAxisId:'left' },
+                { name: 'actual_hamil_pos', color: 'blue.6',yAxisId:'right' },
+                { name: 'actual_tot_pos', color: 'red.6',yAxisId:'left' },
               ]}
               isCollapsible
+              useDualAxis={true}
+              leftAxisLabel="Kasus Malaria"
+              rightAxisLabel="Ibu Hamil dengan Malaria"
+            />
+          </Box>
+          <Box>
+            <Statbox
+              title="Total Kasus Malaria dan Kematian dengan Malaria"
+              icon={IconArticle}
+              data={getChartData()}
+              textStatbox={textStatbox}
+              dataKey="monthYear"
+              series={[
+                { name: 'predicted_kematian_malaria', color: 'grey',yAxisId:'right' },
+                { name: 'predicted_tot_pos', color: 'grey',yAxisId:'left' },
+                { name: 'actual_kematian_malaria', color: 'teal.6',yAxisId:'right' },
+                { name: 'actual_tot_pos', color: 'red.6',yAxisId:'left' },
+              ]}
+              isCollapsible
+              useDualAxis={true}
+              leftAxisLabel="Kasus Malaria"
+              rightAxisLabel="Kematian dengan Malaria"
             />
           </Box>
           
-          <Box>
+          {/* <Box>
             <Statbox
               title="Penggunaan Obat"
               icon={IconArticle}
@@ -1645,7 +1691,7 @@ useEffect(() => {
               ]}
               isCollapsible
             />
-          </Box>
+          </Box> */}
         </SimpleGrid>
         
         <Space h="lg" />
@@ -1653,7 +1699,7 @@ useEffect(() => {
         <SimpleGrid cols={{ base: 1, xs: 2, md: 2 }}>
           <Box>
             <Statbox
-              title="Tipe Parasit"
+              title="Kasus Malaria Berdasarkan Tipe Parasit"
               icon={IconArticle}
               data={getChartData()}
               textStatbox={textStatbox}
@@ -1661,18 +1707,22 @@ useEffect(() => {
               series={[
                 { name: 'predicted_p_pf', color: 'grey' },
                 { name: 'predicted_p_pv', color: 'grey' },
-                { name: 'predicted_p_po', color: 'grey' },
-                { name: 'predicted_p_pm', color: 'grey' },
-                { name: 'predicted_p_pk', color: 'grey' },
+                { name: 'predicted_p_others', color: 'grey' },
+                // { name: 'predicted_p_po', color: 'grey' },
+                // { name: 'predicted_p_pm', color: 'grey' },
+                // { name: 'predicted_p_pk', color: 'grey' },
                 { name: 'predicted_p_mix', color: 'grey' },
-                { name: 'predicted_p_suspek_pk', color: 'grey' },
+                // { name: 'predicted_tot_pos', color: 'grey' },
+                // { name: 'predicted_p_suspek_pk', color: 'grey' },
                 { name: 'actual_p_pf', color: 'blue.6' },
-                { name: 'actual_p_pv', color: 'cyan.6' },
-                { name: 'actual_p_po', color: 'green.6' },
-                { name: 'actual_p_pm', color: 'lime.6' },
-                { name: 'actual_p_pk', color: 'orange.6' },
-                { name: 'actual_p_mix', color: 'teal.6' },
-                { name: 'actual_p_suspek_pk', color: 'red.6' },
+                { name: 'actual_p_pv', color: 'lime.6' },
+                { name: 'actual_p_others', color: 'green.6' },
+                // { name: 'actual_p_po', color: 'green.6' },
+                // { name: 'actual_p_pm', color: 'lime.6' },
+                // { name: 'actual_p_pk', color: 'orange.6' },
+                { name: 'actual_p_mix', color: 'orange.6' },
+                // { name: 'actual_tot_pos', color: 'red.6' },
+                // { name: 'actual_p_suspek_pk', color: 'red.6' },
               ]}
               isCollapsible
             />
@@ -1680,7 +1730,7 @@ useEffect(() => {
           
           <Box>
             <Statbox
-              title="Origin"
+              title="Kasus Malaria Berdasarkan Origin"
               icon={IconArticle}
               data={getChartData()}
               textStatbox={textStatbox}
@@ -1697,6 +1747,134 @@ useEffect(() => {
             />
           </Box>
         </SimpleGrid>
+      </>
+    );
+  };
+  const renderClimateContent = () => {
+    const formattedLastUpdateDate = monthYear ? convertDateFormat(monthYear) : 'N/A';
+    return (
+      <>
+        <Paper withBorder p="md" radius="md" my="md" bg="orange.0">
+        <Group>
+          <div>
+            <Title order={4}>Korelasi Data Iklim dengan Kasus Malaria</Title>
+            <Text size="sm" color="dimmed">
+              Menampilkan data historis aktual hingga {formattedLastUpdateDate}
+            </Text>
+          </div>
+          <Badge 
+            size="lg" 
+            color="blue" 
+            radius="sm"
+            leftSection={
+              <ThemeIcon color="blue" size={14} radius="xl" variant="filled">
+                <IconChartLine size={8} />
+              </ThemeIcon>
+            }
+          >
+            Data Aktual
+          </Badge>
+        </Group>
+        <Text size="xs" mt="xs" style={{ fontStyle: 'italic' }}>
+          Grafik menampilkan data aktual (warna solid)
+        </Text>
+      </Paper>
+        <SimpleGrid cols={{ base: 1, xs: 2, md: 2 }}>
+          <Box>
+            <Statbox
+              title="Curah Hujan dan Total Kasus Malaria"
+              icon={IconArticle}
+              data={getChartData()}
+              textStatbox={textStatbox}
+              dataKey="monthYear"
+              series={[
+                { name: 'actual_hujan_mean', color: 'indigo.6', yAxisId:'right' },
+                { name: 'actual_tot_pos', color: 'red.6', yAxisId:'left' },
+              ]}
+              isCollapsible
+              useDualAxis={true}
+              leftAxisLabel="Kasus Malaria"
+              rightAxisLabel="Curah Hujan"
+            />
+          </Box>
+          
+          <Box>
+            <Statbox
+              title="Suhu dan Total Kasus Malaria"
+              icon={IconArticle}
+              data={getChartData()}
+              textStatbox={textStatbox}
+              dataKey="monthYear"
+              series={[
+                { name: 'actual_tm_mean', color: 'orange.6', yAxisId:'right' },
+                { name: 'actual_tot_pos', color: 'red.6', yAxisId:'left' },
+              ]}
+              isCollapsible
+              useDualAxis={true}
+              leftAxisLabel="Kasus Malaria"
+              rightAxisLabel="Suhu"
+            />
+          </Box>
+        </SimpleGrid>
+        
+        <Space h="lg" />
+        
+        <SimpleGrid cols={{ base: 1, xs: 2, md: 2 }}>
+        <Box>
+            <Statbox
+              title="Kelembapan Relatif dan Total Kasus Malaria"
+              icon={IconArticle}
+              data={getChartData()}
+              textStatbox={textStatbox}
+              dataKey="monthYear"
+              series={[
+                { name: 'actual_rh_mean', color: 'green.6', yAxisId:'right' },
+                { name: 'actual_tot_pos', color: 'red.6', yAxisId:'left' },
+              ]}
+              isCollapsible
+              useDualAxis={true}
+              leftAxisLabel="Kasus Malaria"
+              rightAxisLabel="Kelembapan Relatif"
+            />
+          </Box>
+          <Box>
+            <Statbox
+              title="Kecepatan Angin dan Total Kasus Malaria"
+              icon={IconArticle}
+              data={getChartData()}
+              textStatbox={textStatbox}
+              dataKey="monthYear"
+              series={[
+                { name: 'actual_max_value_10v', color: 'yellow.6', yAxisId:'right' },
+                { name: 'actual_tot_pos', color: 'red.6', yAxisId:'left' },
+              ]}
+              isCollapsible
+              useDualAxis={true}
+              leftAxisLabel="Kasus Malaria"
+              rightAxisLabel="Kecepatan Angin"
+            />
+          </Box>
+          
+          {/* <Box>
+            <Statbox
+              title="Penggunaan Obat"
+              icon={IconArticle}
+              data={getChartData()}
+              textStatbox={textStatbox}
+              dataKey="monthYear"
+              series={[
+                { name: 'predicted_obat_standar', color: 'grey' },
+                { name: 'predicted_obat_nonprogram', color: 'grey' },
+                { name: 'predicted_obat_primaquin', color: 'grey' },
+                { name: 'actual_obat_standar', color: 'indigo.6' },
+                { name: 'actual_obat_nonprogram', color: 'blue.6' },
+                { name: 'actual_obat_primaquin', color: 'teal.6' },
+              ]}
+              isCollapsible
+            />
+          </Box> */}
+        </SimpleGrid>
+        
       </>
     );
   };
@@ -1779,11 +1957,152 @@ useEffect(() => {
     );
   };
 
+  // const dataSistemPeringatanDini = [
+  //   // Kasus di daerah eliminasi (DKI Jakarta) dengan kasus indigenous
+  //   {
+  //     month: 1,
+  //     year: 2023,
+  //     status: "predicted",
+  //     kd_kab: "3171",
+  //     kd_prov: "31",
+  //     province: "DKI JAKARTA",
+  //     city: "JAKARTA PUSAT",
+  //     predicted_tot_pos: 5,
+  //     predicted_kematian_malaria: 0,
+  //     predicted_penularan_indigenus: 1, // Melebihi ambang batas untuk daerah eliminasi (>= 1)
+  //     status_endemis: "Eliminasi"
+  //   },
+    
+  //   // Kasus di daerah endemis rendah (Jawa Barat) dengan kasus indigenous tinggi
+  //   {
+  //     month: 1,
+  //     year: 2023,
+  //     status: "predicted",
+  //     kd_kab: "3273",
+  //     kd_prov: "32",
+  //     province: "JAWA BARAT",
+  //     city: "BANDUNG",
+  //     predicted_tot_pos: 15,
+  //     predicted_kematian_malaria: 0,
+  //     predicted_penularan_indigenus: 4, // Melebihi ambang batas untuk endemis rendah (>= 2)
+  //     status_endemis: "Endemis Rendah"
+  //   },
+    
+  //   // Kasus di daerah endemis sedang (Sulawesi Selatan) dengan total kasus tinggi
+  //   {
+  //     month: 1,
+  //     year: 2023,
+  //     status: "predicted",
+  //     kd_kab: "7371",
+  //     kd_prov: "73",
+  //     province: "SULAWESI SELATAN",
+  //     city: "MAKASSAR",
+  //     predicted_tot_pos: 25, // Melebihi ambang batas untuk endemis sedang (>= 2)
+  //     predicted_kematian_malaria: 0,
+  //     predicted_penularan_indigenus: 15,
+  //     status_endemis: "Endemis Sedang"
+  //   },
+    
+  //   // Kasus di daerah endemis tinggi (Papua) dengan tingkat kematian tinggi
+  //   {
+  //     month: 1,
+  //     year: 2023,
+  //     status: "predicted",
+  //     kd_kab: "9401",
+  //     kd_prov: "94",
+  //     province: "PAPUA",
+  //     city: "JAYAPURA",
+  //     predicted_tot_pos: 120, // Melebihi ambang batas untuk endemis tinggi (>= 2)
+  //     predicted_kematian_malaria: 1, // Tingkat kematian: 1/120 = 0.83% > 0.5%
+  //     predicted_penularan_indigenus: 80,
+  //     status_endemis: "Endemis Tinggi III"
+  //   },
+    
+  //   // Kasus di daerah endemis tinggi (Papua) dengan tingkat kematian sangat tinggi
+  //   {
+  //     month: 1,
+  //     year: 2023,
+  //     status: "predicted",
+  //     kd_kab: "9402",
+  //     kd_prov: "94",
+  //     province: "PAPUA",
+  //     city: "MIMIKA",
+  //     predicted_tot_pos: 150,
+  //     predicted_kematian_malaria: 3, // Tingkat kematian: 3/150 = 2% > 0.5%
+  //     predicted_penularan_indigenus: 95,
+  //     status_endemis: "Endemis Tinggi III"
+  //   },
+    
+  //   // Data bulan berikutnya tanpa peringatan (tidak perlu ditampilkan)
+  //   {
+  //     month: 1,
+  //     year: 2023,
+  //     status: "predicted",
+  //     kd_kab: "3171",
+  //     kd_prov: "31",
+  //     province: "DKI JAKARTA",
+  //     city: "JAKARTA PUSAT",
+  //     predicted_tot_pos: 2,
+  //     predicted_kematian_malaria: 0,
+  //     predicted_penularan_indigenus: 0, // Tidak melebihi ambang batas
+  //     status_endemis: "Eliminasi"
+  //   },
+    
+  //   // Data aktual (tidak akan dideteksi oleh sistem peringatan dini karena bukan prediksi)
+  //   {
+  //     month: 2,
+  //     year: 2023,
+  //     status: "predicted",
+  //     kd_kab: "9401",
+  //     kd_prov: "94",
+  //     province: "PAPUA",
+  //     city: "JAYAPURA",
+  //     predicted_tot_pos: 110,
+  //     predicted_kematian_malaria: 1,
+  //     predicted_penularan_indigenus: 70,
+  //     status_endemis: "Endemis Tinggi III"
+  //   },
+    
+  //   // Data prediksi untuk bulan yang sudah lewat (tidak akan dideteksi)
+  //   {
+  //     month: 1,
+  //     year: 2023,
+  //     status: "predicted",
+  //     kd_kab: "7371",
+  //     kd_prov: "73",
+  //     province: "SULAWESI SELATAN",
+  //     city: "MAKASSAR",
+  //     predicted_tot_pos: 30,
+  //     predicted_kematian_malaria: 0,
+  //     predicted_penularan_indigenus: 18,
+  //     status_endemis: "Endemis Sedang"
+  //   },
+    
+  //   // Data prediksi untuk >6 bulan ke depan (tidak akan dideteksi)
+  //   {
+  //     month: 1,
+  //     year: 2023,
+  //     status: "predicted",
+  //     kd_kab: "3273",
+  //     kd_prov: "32",
+  //     province: "JAWA BARAT",
+  //     city: "BANDUNG",
+  //     predicted_tot_pos: 12,
+  //     predicted_kematian_malaria: 0,
+  //     predicted_penularan_indigenus: 5,
+  //     status_endemis: "Endemis Rendah"
+  //   }
+  // ];
+  
+
   return (
     <div className={classes.root}>
       <Title order={1}>Dashboard Monitoring Malaria</Title>
       <Space h="lg" />
-
+      {/* Warning System */}
+      <EarlyWarningSystemMalaria data={earlyWarningData} latestActualMonthYear={monthYear}/>
+          
+          <Space h="md" />
       {/* All filters in one Paper */}
       <Paper withBorder p="md" radius="md" mb="md">
         <SimpleGrid cols={{ base: 1, sm: 5, md: 5 }} spacing="md">
@@ -1853,13 +2172,19 @@ useEffect(() => {
         </Paper>
       ) : (
         <>
-          {/* Tab navigation */}
+
           <Tabs value={activeTab} onChange={setActiveTab} mb="md">
             <Tabs.List>
               <Tabs.Tab value="dashboard">
                 <Group>
                   <IconDashboard size={14} />
                   <span>Dashboard</span>
+                </Group>
+              </Tabs.Tab>
+              <Tabs.Tab value="climate">
+                <Group>
+                  <IconCloud size={14} />
+                  <span>Data Iklim</span>
                 </Group>
               </Tabs.Tab>
               <Tabs.Tab value="table">
@@ -1879,6 +2204,7 @@ useEffect(() => {
           
           {/* Tab content */}
           {activeTab === 'dashboard' && renderDashboardContent()}
+          {activeTab === 'climate' && renderClimateContent()}
           {activeTab === 'table' && renderTableContent()}
           {activeTab === 'map' && renderMapContent()}
           {/* Floating Weather Widget */}

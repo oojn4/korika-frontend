@@ -1,10 +1,8 @@
 // src/components/MapVisualization/components/ProvinceMapDBD.tsx
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import mapboxgl, { Map as MapboxMap, Popup } from 'mapbox-gl';
-import { geoJsonUrls } from '../utils/mapUtilsDBD';
-import { metricOptionsDBD } from '../utils/mapUtilsDBD';
-import { getColorForValue } from '../utils/mapUtilsDBD';
 import _ from 'lodash';
+import mapboxgl, { Map as MapboxMap, Popup } from 'mapbox-gl';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { geoJsonUrls, getColorForValue, metricOptionsDBD } from '../utils/mapUtilsDBD';
 
 interface AggregatedDBDGeoData {
   kd_prov: string;
@@ -316,7 +314,7 @@ const ProvinceMapDBD: React.FC<ProvinceMapDBDProps> = ({ aggregatedData, metricT
               <strong>Kasus DBD:</strong> ${provinceData.dbd_p || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
-              <strong>Kematian DBD:</strong> ${provinceData.dbd_m || 0} kasus
+              <strong>Kematian dengan DBD:</strong> ${provinceData.dbd_m || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
               <strong>CFR:</strong> ${cfr}%
@@ -442,7 +440,7 @@ const ProvinceMapDBD: React.FC<ProvinceMapDBDProps> = ({ aggregatedData, metricT
               <strong>Kasus DBD:</strong> ${currentTooltipData.provinceData.dbd_p || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
-              <strong>Kematian DBD:</strong> ${currentTooltipData.provinceData.dbd_m || 0} kasus
+              <strong>Kematian dengan DBD:</strong> ${currentTooltipData.provinceData.dbd_m || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
               <strong>CFR:</strong> ${cfr}%

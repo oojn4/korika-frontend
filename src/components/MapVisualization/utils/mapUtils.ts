@@ -36,7 +36,15 @@ export const getColorForValue = (value: number, max: number) => {
     { value: 'pos_15_64', label: 'Kasus Usia 15-64' },
     { value: 'pos_diatas_64', label: 'Kasus Usia >64' },
     { value: 'hamil_pos', label: 'Kasus Ibu Hamil' },
-    { value: 'kematian_malaria', label: 'Kematian Malaria' }
+    { value: 'kematian_malaria', label: 'Kematian dengan Malaria' },
+    { value: 'p_pf', label: 'Kasus dengan P. falciparum' },
+    { value: 'p_pv', label: 'Kasus dengan P. vivax' },
+    { value: 'p_mix', label: 'Kasus dengan P. mix' },
+    { value: 'p_others', label: 'Parasit Lainnya' },
+    { value: 'penularan_indigenus', label: 'Penularan Indigenus' },
+    { value: 'penularan_impor', label: 'Penularan Impor' },
+    { value: 'penularan_induced', label: 'Penularan Induced' },
+    { value: 'relaps', label: 'Relaps' }
   ];
   
   // GeoJSON URLs

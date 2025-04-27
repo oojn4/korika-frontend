@@ -1,4 +1,4 @@
-#  Climate Smart Indonesia
+#  ClimateSmart Indonesia
 
 ## Description
 
@@ -7,7 +7,7 @@
 
 
 ## Installation
-To get started with Climate Smart Indonesia, follow these steps:
+To get started with ClimateSmart Indonesia, follow these steps:
 1. Download or clone this repository:
 ```
 git clone https://github.com/

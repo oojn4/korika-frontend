@@ -1,5 +1,5 @@
-import { Button, Collapse, Group, Pagination, Paper, Table, Text, MultiSelect, ActionIcon, TextInput } from '@mantine/core';
-import { IconChevronDown, IconChevronUp, IconSettings, IconColumns, IconSearch } from '@tabler/icons-react';
+import { ActionIcon, Button, Collapse, Group, MultiSelect, Pagination, Paper, Table, Text, TextInput } from '@mantine/core';
+import { IconChevronDown, IconChevronUp, IconColumns, IconSearch, IconSettings } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { DBDRawDataItem } from '../../@types/dashboard';
 
@@ -12,7 +12,7 @@ type Props = {
 // Define base data metrics for DBD (different from Malaria)
 const BASE_METRICS = [
   { value: 'dbd_p', label: 'Kasus DBD' },
-  { value: 'dbd_m', label: 'Kematian DBD' }
+  { value: 'dbd_m', label: 'Kematian dengan DBD' }
 ];
 
 // Generate complete column list with base metrics and their change indicators

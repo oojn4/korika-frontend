@@ -1,16 +1,16 @@
-import { Select, SimpleGrid, Space, Text, Title, Box, Paper, Group, Button, Tabs, ThemeIcon, Badge, ActionIcon } from '@mantine/core';
+import { ActionIcon, Badge, Box, Button, Group, Paper, Select, SimpleGrid, Space, Tabs, Text, ThemeIcon, Title } from '@mantine/core';
 import { MonthPickerInput } from '@mantine/dates';
-import { IconArticle, IconDashboard, IconMap, IconTable, IconChartBar,  IconCloud, IconAlertCircle, IconMedicalCross, IconInfoCircle, IconChartLine } from '@tabler/icons-react';
+import { IconAlertCircle, IconArticle, IconChartBar, IconChartLine, IconCloud, IconDashboard, IconInfoCircle, IconMap, IconMedicalCross, IconTable } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
-import {BMKGWeatherResponse, LeptoAggregateDataItem, LeptoRawDataItem, Master } from '../../@types/dashboard';
+import { BMKGWeatherResponse, LeptoAggregateDataItem, LeptoRawDataItem, Master } from '../../@types/dashboard';
+import KPICard from '../../components/KPICard/KPICard'; // Assumed new component
+import EnhancedMapVisualizationLepto from '../../components/LeptoMapVisualization/EnhancedMapVisualizationLepto';
 import Statbox from '../../components/Statbox/Statbox';
+import TableRawDataLepto from '../../components/TableRawData/TableRawDataLepto';
+import WeatherWidget from '../../components/WeatherWidget/WeatherWidget';
 import { DashboardService } from '../../services/services/dashboard.service';
 import { WeatherService } from '../../services/services/weather.service'; // Assumed new service
 import classes from './Dashboard.module.css';
-import KPICard from '../../components/KPICard/KPICard'; // Assumed new component
-import WeatherWidget from '../../components/WeatherWidget/WeatherWidget';
-import TableRawDataLepto from '../../components/TableRawData/TableRawDataLepto';
-import EnhancedMapVisualizationLepto from '../../components/LeptoMapVisualization/EnhancedMapVisualizationLepto';
 
 type ComboboxItem = {
   value: String;
@@ -969,7 +969,7 @@ const LeptoPage = () => {
         />
         
         <KPICard 
-          title="Total Kematian"
+          title="Total Kematian dengan Lepto"
           value={kpiData.totalDeaths}
           icon={<IconMedicalCross size={24} />}
           color="red"

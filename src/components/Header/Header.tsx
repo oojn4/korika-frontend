@@ -3,13 +3,14 @@ import {
   Divider,
   Drawer,
   Group,
+  Image,
+  Menu,
   ScrollArea,
-  Title,
-  rem,
-  Menu, // Added Menu component
-  UnstyledButton, // Added for the dropdown trigger
+  UnstyledButton,
+  rem
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { IconChevronDown } from '@tabler/icons-react';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -19,7 +20,8 @@ import { checkAdminAccess } from '../../utils/checkAccess';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import UserToggle from '../UserToggle/UserToggle';
 import classes from './Header.module.css';
-import { IconChevronDown } from '@tabler/icons-react'; // Import dropdown icon
+
+const heroImage = '/logo-removebg-preview.png';
 
 const HeaderComponent = () => {
   const user = useSelector((state: RootState) => state.auth.user);
@@ -41,13 +43,15 @@ const HeaderComponent = () => {
   return (
     <>
       <header className={classes.header}>
-        <Group justify="space-between" h="100%" gap={0}>
-          <Title
-            order={3}
+        <Group justify="space-between" h="100%" align="center" gap={0}>
+          <Image
+            src={heroImage}
+            alt="ClimateSmart Indonesia"
+            height={60}
+            className={classes.heroImage}
             onClick={handleClickedLogo}
-            style={{ cursor: 'pointer'}}>
-            {t('app-name')}
-          </Title>
+            style={{ cursor: 'pointer' }}
+          />
 
           <Group h="100%" gap={0} visibleFrom="sm">
             <a href="/#" className={classes.link}>
@@ -59,7 +63,6 @@ const HeaderComponent = () => {
               </a>
             }
             
-            {/* Dashboard dropdown menu */}
             <Menu 
               position="bottom-start"
               offset={0}
@@ -76,9 +79,6 @@ const HeaderComponent = () => {
               </Menu.Target>
 
               <Menu.Dropdown>
-                {/* <Menu.Item onClick={() => navigateTo('/dashboard')}>
-                  {t('header.dashboard')}
-                </Menu.Item> */}
                 <Menu.Item onClick={() => navigateTo('/dashboard/malaria')}>
                   Malaria
                 </Menu.Item>
@@ -92,14 +92,12 @@ const HeaderComponent = () => {
             </Menu>
           </Group>
 
-          <Group visibleFrom="sm" gap={5}>
-            {/* <LocaleToggle /> */}
+          <Group visibleFrom="sm" gap={0}>
             <ThemeToggle />
             <UserToggle />
           </Group>
 
-          <Group hiddenFrom="sm" gap={5}>
-            {/* <LocaleToggle /> */}
+          <Group hiddenFrom="sm" gap={0}>
             <ThemeToggle />
             <Burger opened={drawerOpened} onClick={toggleDrawer} />
           </Group>
@@ -127,7 +125,6 @@ const HeaderComponent = () => {
             </a>
           }
           
-          {/* Mobile view dropdown implementation */}
           <Menu 
             position="bottom-start" 
             offset={0}

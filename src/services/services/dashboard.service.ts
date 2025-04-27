@@ -1,4 +1,4 @@
-import { AggregateDataResponse, RegionResponse, RawDataResponse } from "../../@types/dashboard";
+import { AggregateDataResponse, EarlyWarningSystemMalariaResponse, RawDataResponse, RegionResponse } from "../../@types/dashboard";
 import appConfig from "../../configs/app.config";
 import ApiService from "../ApiService";
 
@@ -10,12 +10,20 @@ export const DashboardService = {
       url: `${baseUrl}/get-aggregate-data-malaria?province=${province}&city=${city}&district=${district}&start=${start_month_year}&end=${end_month_year}`,
       method: 'GET',
     })
+    console.log(res.data);
     return res.data;
   },
   async indexRawDataMalaria(province : string, city: string,district: string, month_year : string, status: string): Promise<RawDataResponse> {
     const res = await ApiService.fetchData<undefined, RawDataResponse>({
       url: `${baseUrl}/get-raw-data-malaria?province=${province}&city=${city}&district=${district}&month_year=${month_year}&status=${status}`,
       headers: { 'Content-Type': 'application/json' },
+      method: 'GET',
+    })
+    return res.data;
+  },
+  async indexWarningMalaria(): Promise<EarlyWarningSystemMalariaResponse> {
+    const res = await ApiService.fetchData<undefined, EarlyWarningSystemMalariaResponse>({
+      url: `${baseUrl}/get-warning-malaria`,
       method: 'GET',
     })
     return res.data;

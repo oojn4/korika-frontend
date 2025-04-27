@@ -192,7 +192,7 @@ const MapVisualization: React.FC<MapVisualizationProps> = ({ data,predictedMonth
   <>
   <Paper  withBorder p="md" radius="md">
     <Group justify="space-between" align="flex-end" gap={0} mb="md">
-        <Text fz="xl" fw={700}>Sebaran Prediksi Jumlah Kasus Malaria Berdasarkan Faskes, {predictedMonthYear}</Text>
+        <Text fz="xl" fw={700}>Sebaran Prediksi Total Kasus Malaria Berdasarkan Faskes, {predictedMonthYear}</Text>
         <Button variant="subtle" onClick={() => setTableOpen((prev) => !prev)}>
           {tableOpen ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
         </Button>

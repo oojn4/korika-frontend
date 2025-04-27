@@ -1,0 +1,141 @@
+.wrapper {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.container {
+  padding-top: 60px; /* Adjusted to account for fixed header */
+  padding-bottom: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 0; /* Removed bottom margin completely */
+  width: 100%;
+}
+
+.logoContainer {
+  margin-bottom: 0; /* Removed bottom margin completely */
+}
+
+.partnerLogo {
+  height: 50px;
+  max-width: 120px;
+  object-fit: contain;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0; /* Removed top margin completely */
+  padding-top: 0; /* Removed top padding */
+  padding-bottom: 20px;
+  gap: 20px;
+}
+
+.heroContent {
+  flex: 1;
+  max-width: 600px;
+}
+
+.title {
+  font-size: 44px;
+  line-height: 1.1;
+  font-weight: 800;
+  color: var(--mantine-color-blue-7);
+}
+
+.subtitle {
+  font-size: 28px;
+  line-height: 1.2;
+  margin-top: 15px;
+  color: var(--mantine-color-dark-4);
+}
+
+.description {
+  font-size: 16px;
+  line-height: 1.5;
+  margin-top: 15px;
+}
+
+.heroImage {
+  max-width: 40%;
+  height: auto;
+}
+
+.carouselSection {
+  margin-top: 40px;
+  padding: 20px 0;
+}
+
+.carouselTitle {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.carousel {
+  width: 100%;
+}
+
+.carouselSlide {
+  cursor: pointer;
+}
+
+.dashboardCard {
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dashboardCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.dashboardInfo {
+  padding: 15px;
+}
+
+.ctaButton {
+  transition: transform 0.2s;
+}
+
+.ctaButton:hover {
+  transform: translateY(-3px);
+}
+
+.footer {
+  margin-top: 60px;
+  text-align: center;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .heroContent {
+    max-width: 100%;
+  }
+  
+  .heroImage {
+    max-width: 70%;
+    margin-top: 30px;
+  }
+}
+
+@media (max-width: 576px) {
+  .title {
+    font-size: 36px;
+  }
+  
+  .subtitle {
+    font-size: 24px;
+  }
+}

@@ -11,7 +11,7 @@ export type AppConfig = {
 }
 
 const appConfig: AppConfig = {
-  appName: 'Climate Smart Indonesia',
+  appName: 'ClimateSmart Indonesia',
   locale: 'en',
   baseUrl: 'http://localhost:3000',
   authSecret: 'IAADLu2Qu+xC4kteZfSUNOi5s/M6zSi7Z6tP85h4GBY=',

@@ -1,10 +1,8 @@
 // src/components/MapVisualization/components/CityMapDBD.tsx
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import mapboxgl, { Map as MapboxMap, Popup } from 'mapbox-gl';
-import { geoJsonUrls } from '../utils/mapUtilsLepto';
-import { metricOptionsLepto } from '../utils/mapUtilsLepto';
-import { getColorForValue } from '../utils/mapUtilsLepto';
 import _ from 'lodash';
+import mapboxgl, { Map as MapboxMap, Popup } from 'mapbox-gl';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { geoJsonUrls, getColorForValue, metricOptionsLepto } from '../utils/mapUtilsLepto';
 
 interface AggregatedLeptoGeoData {
   kd_prov: string;
@@ -338,7 +336,7 @@ const CityMapLepto: React.FC<CityMapLeptoProps> = ({ aggregatedData, metricToSho
               <strong>Kasus DBD:</strong> ${cityData.lep_k || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
-              <strong>Kematian DBD:</strong> ${cityData.lep_m || 0} kasus
+              <strong>Kematian dengan DBD:</strong> ${cityData.lep_m || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
               <strong>CFR:</strong> ${cfr}%
@@ -458,7 +456,7 @@ const CityMapLepto: React.FC<CityMapLeptoProps> = ({ aggregatedData, metricToSho
               <strong>Kasus DBD:</strong> ${currentTooltipData.cityData.lep_k || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
-              <strong>Kematian DBD:</strong> ${currentTooltipData.cityData.lep_m || 0} kasus
+              <strong>Kematian dengan DBD:</strong> ${currentTooltipData.cityData.lep_m || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
               <strong>CFR:</strong> ${cfr}%

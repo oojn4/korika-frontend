@@ -1,36 +1,36 @@
 import {
-    ActionIcon,
-    Badge,
-    Button,
-    Center,
-    Grid,
-    Group,
-    Loader,
-    Menu,
-    Modal,
-    Notification,
-    NumberInput,
-    Pagination,
-    Paper,
-    Select,
-    Stack,
-    Stepper,
-    Table,
-    Tabs,
-    Text,
-    TextInput,
-    Title
+  ActionIcon,
+  Badge,
+  Button,
+  Center,
+  Grid,
+  Group,
+  Loader,
+  Menu,
+  Modal,
+  Notification,
+  NumberInput,
+  Pagination,
+  Paper,
+  Select,
+  Stack,
+  Stepper,
+  Table,
+  Tabs,
+  Text,
+  TextInput,
+  Title
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
-    IconDotsVertical,
-    IconEdit,
-    IconFilter,
-    IconHospital,
-    IconPlus,
-    IconTemperature,
-    IconTrash,
-    IconVirus
+  IconDotsVertical,
+  IconEdit,
+  IconFilter,
+  IconHospital,
+  IconPlus,
+  IconTemperature,
+  IconTrash,
+  IconVirus
 } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react';
 import { HealthFacilityService } from '../../services/services/healthfacility.service';
@@ -962,7 +962,7 @@ const handleFilterChange = (key: keyof QueryParams, value: any): void => {
                   <Grid>
                     <Grid.Col span={4}>
                       <NumberInput
-                        label="Kematian Malaria"
+                        label="Kematian dengan Malaria"
                         value={formData.kematian_malaria}
                         onChange={(value) => handleNumberChange('kematian_malaria', typeof value === 'number' ? value : undefined)}
                         min={0}

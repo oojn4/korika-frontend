@@ -1,17 +1,17 @@
 // src/components/MapVisualization/EnhancedMapVisualizationLepto.tsx
-import React, { useEffect, useRef, useState } from 'react';
-import { Button, Collapse, Group, Paper, Text, Tabs, Select, SimpleGrid, Space } from '@mantine/core';
+import { Button, Collapse, Group, Paper, Select, SimpleGrid, Space, Tabs, Text } from '@mantine/core';
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import React, { useEffect, useRef, useState } from 'react';
 import { LeptoRawDataItem } from '../../@types/dashboard';
 import useDataAggregationLepto from './hooks/useDataAggregationLepto';
 import { metricOptionsLepto } from './utils/mapUtilsLepto';
 
 // Import map components
-import ProvinceMapLepto from './components/ProvinceMapLepto';
-import CityMapLepto from './components/CityMapLepto';
 import MapLegendLepto from '../MapLegend/MapLegend';
+import CityMapLepto from './components/CityMapLepto';
+import ProvinceMapLepto from './components/ProvinceMapLepto';
 
 // Set Mapbox token
 mapboxgl.accessToken = 'pk.eyJ1IjoiZmF1emFuZmFsZHkiLCJhIjoiY20yYmF0MG94MG1oYjJrcXhkMWo4dGh4eCJ9.X0AVMmOyRm1Q8ObMiqL7VA';
@@ -62,7 +62,7 @@ const EnhancedMapVisualizationLepto: React.FC<EnhancedMapVisualizationLeptoProps
   // Get label for selected metric
   const getMetricLabel = () => {
     const selectedMetric = metricOptionsLepto.find(m => m.value === metricToShow);
-    return selectedMetric ? selectedMetric.label : 'Jumlah Kasus Lepto';
+    return selectedMetric ? selectedMetric.label : 'Total Kasus Lepto';
   };
   
   // Log data for debugging
