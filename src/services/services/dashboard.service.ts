@@ -1,4 +1,4 @@
-import { AggregateDataResponse, EarlyWarningSystemMalariaResponse, RawDataResponse, RegionResponse } from "../../@types/dashboard";
+import { AggregateDataResponse, EarlyWarningSystemDBDResponse, EarlyWarningSystemLeptoResponse, EarlyWarningSystemMalariaResponse, RawDataResponse, RegionResponse } from "../../@types/dashboard";
 import appConfig from "../../configs/app.config";
 import ApiService from "../ApiService";
 
@@ -23,6 +23,20 @@ export const DashboardService = {
   async indexWarningMalaria(): Promise<EarlyWarningSystemMalariaResponse> {
     const res = await ApiService.fetchData<undefined, EarlyWarningSystemMalariaResponse>({
       url: `${baseUrl}/get-warning-malaria`,
+      method: 'GET',
+    })
+    return res.data;
+  },
+  async indexWarningLepto(): Promise<EarlyWarningSystemLeptoResponse> {
+    const res = await ApiService.fetchData<undefined, EarlyWarningSystemLeptoResponse>({
+      url: `${baseUrl}/get-warning-lepto`,
+      method: 'GET',
+    })
+    return res.data;
+  },
+  async indexWarningDBD(): Promise<EarlyWarningSystemDBDResponse> {
+    const res = await ApiService.fetchData<undefined, EarlyWarningSystemDBDResponse>({
+      url: `${baseUrl}/get-warning-dbd`,
       method: 'GET',
     })
     return res.data;

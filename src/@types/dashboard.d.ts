@@ -432,8 +432,8 @@ interface Peringatan {
   tahun: number;
   metrik: string;
   nilai: number;
-  mtom: number | null;
-  // ambang_batas: number;
+  tingkat: number | null;
+  status_kenaikan: string;
   // tingkat_keparahan: 'tinggi' | 'sedang' | 'rendah';
   
   status_endemis: string;
@@ -453,6 +453,9 @@ interface DataMalaria {
   predicted_penularan_indigenus: number;
   status_endemis: string;
   predicted_penularan_indigenus_m_to_m_change: number | null;
+  predicted_penularan_indigenus_y_on_y_change: number | null;
+  predicted_tot_pos_m_to_m_change: number | null;
+  predicted_tot_pos_y_on_y_change: number | null;
   [key: string]: any; // Untuk field tambahan lainnya
 }
 interface EarlyWarningSystemMalariaResponse {
@@ -463,5 +466,63 @@ interface EarlyWarningSystemMalariaResponse {
 // Props untuk komponen EarlyWarningSystemMalaria
 interface EarlyWarningSystemMalariaProps {
   data: DataMalaria[];
+  latestActualMonthYear: string;
+}
+
+// Mendefinisikan struktur untuk data API
+interface DataLepto {
+  month: number;
+  year: number;
+  status: string;
+  kd_kab: string;
+  kd_prov: string;
+  province: string;
+  city: string;
+  predicted_lep_k: number;
+  predicted_lep_m: number;
+  status_endemis: string;
+  predicted_lep_k_m_to_m_change: number | null;
+  predicted_lep_k_y_on_y_change: number | null;
+  predicted_lep_m_m_to_m_change: number | null;
+  predicted_lep_m_y_on_y_change: number | null;
+  [key: string]: any; // Untuk field tambahan lainnya
+}
+interface EarlyWarningSystemLeptoResponse {
+  
+  data: DataLepto[];
+  success: boolean;
+}
+// Props untuk komponen EarlyWarningSystemMalaria
+interface EarlyWarningSystemLeptoProps {
+  data: DataLepto[];
+  latestActualMonthYear: string;
+}
+
+// Mendefinisikan struktur untuk data API
+interface DataDBD {
+  month: number;
+  year: number;
+  status: string;
+  kd_kab: string;
+  kd_prov: string;
+  province: string;
+  city: string;
+  predicted_dbd_p: number;
+  predicted_dbd_m: number;
+  status_endemis: string;
+  predicted_dbd_p_m_to_m_change: number | null;
+  predicted_dbd_p_y_on_y_change: number | null;
+  predicted_dbd_m_m_to_m_change: number | null;
+  predicted_dbd_m_y_on_y_change: number | null;
+  [key: string]: any; // Untuk field tambahan lainnya
+}
+interface EarlyWarningSystemDBDResponse {
+  
+  data: DataDBD[];
+  success: boolean;
+}
+// Props untuk komponen EarlyWarningSystemMalaria
+interface EarlyWarningSystemDBDProps {
+  data: DataDBD[];
   latestActualMonthYear: string;
 }

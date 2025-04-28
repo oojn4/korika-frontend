@@ -324,7 +324,7 @@ const CityMapDBD: React.FC<CityMapDBDProps> = ({ aggregatedData, metricToShow, i
               <strong>Kematian dengan DBD:</strong> ${cityData.dbd_m || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
-              <strong>CFR:</strong> ${cfr}%
+              <strong>Tingkat Kematian dengan DBD:</strong> ${cfr}%
             </span>
           </div>
         `)
@@ -442,7 +442,7 @@ const CityMapDBD: React.FC<CityMapDBDProps> = ({ aggregatedData, metricToShow, i
               <strong>Kematian dengan DBD:</strong> ${currentTooltipData.cityData.dbd_m || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
-              <strong>CFR:</strong> ${cfr}%
+              <strong>Tingkat Kematian dengan DBD:</strong> ${cfr}%
             </span>
           </div>
         `);

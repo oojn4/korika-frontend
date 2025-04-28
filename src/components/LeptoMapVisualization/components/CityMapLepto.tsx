@@ -333,13 +333,13 @@ const CityMapLepto: React.FC<CityMapLeptoProps> = ({ aggregatedData, metricToSho
               <strong>${metricLabel}:</strong> ${formattedValue} ${trendIndicator}
             </span>
             <span style="font-size: 12px; display: block;">
-              <strong>Kasus DBD:</strong> ${cityData.lep_k || 0} kasus
+              <strong>Kasus Lepto:</strong> ${cityData.lep_k || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
-              <strong>Kematian dengan DBD:</strong> ${cityData.lep_m || 0} kasus
+              <strong>Kematian dengan Lepto:</strong> ${cityData.lep_m || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
-              <strong>CFR:</strong> ${cfr}%
+              <strong>Tingkat Kematian dengan Lepto:</strong> ${cfr}%
             </span>
           </div>
         `)
@@ -453,13 +453,13 @@ const CityMapLepto: React.FC<CityMapLeptoProps> = ({ aggregatedData, metricToSho
               <strong>${metricLabel}:</strong> ${formattedValue} ${trendIndicator}
             </span>
             <span style="font-size: 12px; display: block;">
-              <strong>Kasus DBD:</strong> ${currentTooltipData.cityData.lep_k || 0} kasus
+              <strong>Kasus Lepto:</strong> ${currentTooltipData.cityData.lep_k || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
-              <strong>Kematian dengan DBD:</strong> ${currentTooltipData.cityData.lep_m || 0} kasus
+              <strong>Kematian dengan Lepto:</strong> ${currentTooltipData.cityData.lep_m || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
-              <strong>CFR:</strong> ${cfr}%
+              <strong>Tingkat Kematian dengan Lepto:</strong> ${cfr}%
             </span>
           </div>
         `);

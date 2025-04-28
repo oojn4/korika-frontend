@@ -647,7 +647,6 @@ const MalariaPage = () => {
     // Get BMKG city code and format it
     const bmkgCityCode = getCityBMKGCode(cityCode);
     const formattedCityCode = bmkgCityCode.replace(/^(\d{2})(\d{2})$/, '$1.$2');
-    
     // Find the city data first
     const cityLocation = weatherData.data.find((loc: any) => 
       loc.lokasi.adm2 === formattedCityCode
@@ -1485,9 +1484,9 @@ useEffect(() => {
           icon={<IconMedicalCross size={24} />}
           color="red"
           footer={<Group>
-            <Text c="dimmed" size="sm">Target: &lt;1%</Text>
-            <Badge color={kpiData.fatalityRate < 1 ? "green" : "red"}>
-              {kpiData.fatalityRate < 1 ? "Tercapai" : "Belum Tercapai"}
+            <Text c="dimmed" size="sm">Target: &lt;0.5%</Text>
+            <Badge color={kpiData.fatalityRate < 0.5 ? "green" : "red"}>
+              {kpiData.fatalityRate < 0.5 ? "Tercapai" : "Belum Tercapai"}
             </Badge>
           </Group>} description={null}        />
         
@@ -2124,7 +2123,7 @@ useEffect(() => {
             onChange={(value) => handleCityChange(value || '')}
             placeholder={province === '00' ? "Select province first" : "Pilih Kabupaten/Kota"}
             data={cities}
-            disabled={province === '00' && districts.length === 0}
+            // disabled={province === '00'}
             required
             allowDeselect
             searchable
@@ -2138,7 +2137,7 @@ useEffect(() => {
             onChange={(value) => handleDistrictChange(value || '')}
             placeholder={province === '00' || district === '' ? "Select district first" : "Pilih Kecamatan"}
             data={districts}
-            disabled={(province === '00' || district === '') && districts.length === 0}
+            // disabled={(province === '00' || district === '' || districts.length === 0)}
             required
             allowDeselect
             searchable
@@ -2166,7 +2165,7 @@ useEffect(() => {
       {!hasData ? (
         <Paper withBorder p="xl" radius="md" mb="lg" bg="gray.0">
           <Text size="lg">
-            No data available for the selected filters. Please adjust your selection.
+            Tidak ada data tersedia pada wilayah ini.
           </Text>
         </Paper>
       ) : (

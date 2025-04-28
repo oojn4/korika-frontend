@@ -2,7 +2,8 @@ import { ActionIcon, Badge, Box, Button, Group, Paper, Select, SimpleGrid, Space
 import { MonthPickerInput } from '@mantine/dates';
 import { IconAlertCircle, IconArticle, IconChartBar, IconChartLine, IconCloud, IconDashboard, IconInfoCircle, IconMap, IconMedicalCross, IconTable } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
-import { BMKGWeatherResponse, LeptoAggregateDataItem, LeptoRawDataItem, Master } from '../../@types/dashboard';
+import { BMKGWeatherResponse, DataLepto, LeptoAggregateDataItem, LeptoRawDataItem, Master } from '../../@types/dashboard';
+import EarlyWarningSystemLepto from '../../components/EarlyWarningSystemLepto/EarlyWarningSystemLepto';
 import KPICard from '../../components/KPICard/KPICard'; // Assumed new component
 import EnhancedMapVisualizationLepto from '../../components/LeptoMapVisualization/EnhancedMapVisualizationLepto';
 import Statbox from '../../components/Statbox/Statbox';
@@ -41,6 +42,7 @@ const LeptoPage = () => {
   const [weatherData, setWeatherData] = useState<BMKGWeatherResponse | null>(null);
   const [filteredWeatherData, setFilteredWeatherData] = useState<BMKGWeatherResponse | null>(null);
     
+  const [earlyWarningData,setEarlyWarningData] = useState<DataLepto[]>([])
   const [activeTab, setActiveTab] = useState<string | null>('dashboard');
   
   const [provinceMapping, setProvinceMapping] = useState<CodeMapping[]>([]);
@@ -121,6 +123,17 @@ const LeptoPage = () => {
       }
     };
     
+    const handleFetchEarlyWarning = async () => {
+      try {
+        const response = await DashboardService.indexWarningLepto();
+        if (response.success) {
+          setEarlyWarningData(response.data);
+        }
+        } catch (error) {
+        return;
+      }
+    };
+
     // Function to handle province change
     const handleProvinceChange = (value: string) => {
       setProvince(value || '00');
@@ -728,7 +741,9 @@ const LeptoPage = () => {
   useEffect(() => {
     handleFetchProvinces();
   }, []);
-  
+  useEffect(() => {
+    handleFetchEarlyWarning();
+  }, [earlyWarningData]);
   // Initialize cities with ALL options on component mount
   useEffect(() => {
     // When component mounts, ensure the cities dropdown has the ALL option
@@ -981,14 +996,14 @@ const LeptoPage = () => {
         />
         
         <KPICard 
-          title="CFR"
+          title="Tingkat Kematian"
           value={`${kpiData.caseFatalityRate.toFixed(2)}%`}
           icon={<IconChartBar size={24} />}
           color="orange"
           footer={<Group>
-            <Text c="dimmed" size="sm">Target: &lt;1%</Text>
-            <Badge color={kpiData.caseFatalityRate < 1 ? "green" : "red"}>
-              {kpiData.caseFatalityRate < 1 ? "Tercapai" : "Belum Tercapai"}
+            <Text c="dimmed" size="sm">Target: &lt;0.5%</Text>
+            <Badge color={kpiData.caseFatalityRate < 0.5 ? "green" : "red"}>
+              {kpiData.caseFatalityRate < 0.5 ? "Tercapai" : "Belum Tercapai"}
             </Badge>
           </Group>}
           description={null}
@@ -1162,11 +1177,140 @@ const LeptoPage = () => {
     );
   };
 
+  const renderClimateContent = () => {
+    const formattedLastUpdateDate = monthYear ? convertDateFormat(monthYear) : 'N/A';
+    return (
+      <>
+        <Paper withBorder p="md" radius="md" my="md" bg="orange.0">
+        <Group>
+          <div>
+            <Title order={4}>Korelasi Data Iklim dengan Kasus Lepto</Title>
+            <Text size="sm" color="dimmed">
+              Menampilkan data historis aktual hingga {formattedLastUpdateDate}
+            </Text>
+          </div>
+          <Badge 
+            size="lg" 
+            color="blue" 
+            radius="sm"
+            leftSection={
+              <ThemeIcon color="blue" size={14} radius="xl" variant="filled">
+                <IconChartLine size={8} />
+              </ThemeIcon>
+            }
+          >
+            Data Aktual
+          </Badge>
+        </Group>
+        <Text size="xs" mt="xs" style={{ fontStyle: 'italic' }}>
+          Grafik menampilkan data aktual (warna solid)
+        </Text>
+      </Paper>
+        <SimpleGrid cols={{ base: 1, xs: 2, md: 2 }}>
+          <Box>
+            <Statbox
+              title="Curah Hujan dan Total Kasus Lepto"
+              icon={IconArticle}
+              data={getChartData()}
+              textStatbox={textStatbox}
+              dataKey="monthYear"
+              series={[
+                { name: 'actual_hujan_mean', color: 'indigo.6', yAxisId:'right' },
+                { name: 'actual_lep_k', color: 'red.6', yAxisId:'left' },
+              ]}
+              isCollapsible
+              useDualAxis={true}
+              leftAxisLabel="Kasus Lepto"
+              rightAxisLabel="Curah Hujan"
+            />
+          </Box>
+          
+          <Box>
+            <Statbox
+              title="Suhu dan Total Kasus Lepto"
+              icon={IconArticle}
+              data={getChartData()}
+              textStatbox={textStatbox}
+              dataKey="monthYear"
+              series={[
+                { name: 'actual_tm_mean', color: 'orange.6', yAxisId:'right' },
+                { name: 'actual_lep_k', color: 'red.6', yAxisId:'left' },
+              ]}
+              isCollapsible
+              useDualAxis={true}
+              leftAxisLabel="Kasus Lepto"
+              rightAxisLabel="Suhu"
+            />
+          </Box>
+        </SimpleGrid>
+        
+        <Space h="lg" />
+        
+        <SimpleGrid cols={{ base: 1, xs: 2, md: 2 }}>
+        <Box>
+            <Statbox
+              title="Kelembapan Relatif dan Total Kasus Lepto"
+              icon={IconArticle}
+              data={getChartData()}
+              textStatbox={textStatbox}
+              dataKey="monthYear"
+              series={[
+                { name: 'actual_rh_mean', color: 'green.6', yAxisId:'right' },
+                { name: 'actual_lep_k', color: 'red.6', yAxisId:'left' },
+              ]}
+              isCollapsible
+              useDualAxis={true}
+              leftAxisLabel="Kasus Lepto"
+              rightAxisLabel="Kelembapan Relatif"
+            />
+          </Box>
+          <Box>
+            <Statbox
+              title="Kecepatan Angin dan Total Kasus Lepto"
+              icon={IconArticle}
+              data={getChartData()}
+              textStatbox={textStatbox}
+              dataKey="monthYear"
+              series={[
+                { name: 'actual_max_value_10v', color: 'yellow.6', yAxisId:'right' },
+                { name: 'actual_lep_k', color: 'red.6', yAxisId:'left' },
+              ]}
+              isCollapsible
+              useDualAxis={true}
+              leftAxisLabel="Kasus Lepto"
+              rightAxisLabel="Kecepatan Angin"
+            />
+          </Box>
+          
+          {/* <Box>
+            <Statbox
+              title="Penggunaan Obat"
+              icon={IconArticle}
+              data={getChartData()}
+              textStatbox={textStatbox}
+              dataKey="monthYear"
+              series={[
+                { name: 'predicted_obat_standar', color: 'grey' },
+                { name: 'predicted_obat_nonprogram', color: 'grey' },
+                { name: 'predicted_obat_primaquin', color: 'grey' },
+                { name: 'actual_obat_standar', color: 'indigo.6' },
+                { name: 'actual_obat_nonprogram', color: 'blue.6' },
+                { name: 'actual_obat_primaquin', color: 'teal.6' },
+              ]}
+              isCollapsible
+            />
+          </Box> */}
+        </SimpleGrid>
+        
+      </>
+    );
+  };
   return (
     <div className={classes.root}>
       <Title order={1}>Dashboard Monitoring Leptospirosis</Title>
       <Space h="lg" />
-
+      <EarlyWarningSystemLepto data={earlyWarningData} latestActualMonthYear={monthYear}/>
+      
       {/* All filters in one Paper */}
       <Paper withBorder p="md" radius="md" mb="md">
         <SimpleGrid cols={{ base: 1, sm: 4, md: 4 }} spacing="md">
@@ -1190,7 +1334,7 @@ const LeptoPage = () => {
             onChange={(value) => handleCityChange(value || '')}
             placeholder={province === '00' ? "Select province first" : "Pilih Kabupaten/Kota"}
             data={cities}
-            disabled={province === '00'}
+            // disabled={province === '00'}
             required
             allowDeselect
             searchable
@@ -1217,7 +1361,7 @@ const LeptoPage = () => {
       {!hasData ? (
         <Paper withBorder p="xl" radius="md" mb="lg" bg="gray.0">
           <Text size="lg">
-            No data available for the selected filters. Please adjust your selection.
+          Tidak ada data tersedia pada wilayah ini.
           </Text>
         </Paper>
       ) : (
@@ -1229,6 +1373,12 @@ const LeptoPage = () => {
                 <Group>
                   <IconDashboard size={14} />
                   <span>Dashboard</span>
+                </Group>
+              </Tabs.Tab>
+              <Tabs.Tab value="climate">
+                <Group>
+                  <IconCloud size={14} />
+                  <span>Data Iklim</span>
                 </Group>
               </Tabs.Tab>
               <Tabs.Tab value="table">
@@ -1248,6 +1398,7 @@ const LeptoPage = () => {
           
           {/* Tab content */}
           {activeTab === 'dashboard' && renderDashboardContent()}
+          {activeTab === 'climate' && renderClimateContent()}
           {activeTab === 'table' && renderTableContent()}
           {activeTab === 'map' && renderMapContent()}
           

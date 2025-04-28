@@ -324,7 +324,7 @@ const ProvinceMapLepto: React.FC<ProvinceMapLeptoProps> = ({ aggregatedData, met
               <strong>Kematian dengan Lepto:</strong> ${provinceData.lep_m || 0} kasus
             </span>
             <span style="font-size: 12px; display: block;">
-              <strong>CFR:</strong> ${cfr}%
+              <strong>Tingkat Kematian dengan Lepto:</strong> ${cfr}%
             </span>
           </div>
         `)

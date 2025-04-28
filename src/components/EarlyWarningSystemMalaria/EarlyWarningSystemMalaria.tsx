@@ -112,8 +112,8 @@ export const EarlyWarningSystemMalaria = ({
       
       // Hitung ambang batas berdasarkan aturan yang baru:
       // 1. Daerah Eliminasi: minimal 1 kasus indigenous
-      // 2. Daerah endemis rendah: 2*kasus indigenous
-      // 3. Daerah endemis sedang dan tinggi: 2*kasus apapun
+      // 2. Daerah endemis rendah: 2*kasus indigenous dari bulan sebelumnya atau bulan yang sama tahun lalu (100% mtom atau yony)
+      // 3. Daerah endemis sedang dan tinggi: 2*kasus apapun (100% mtom atau yony)
       if (tipeAturanEndemis === 'eliminasi' && item.predicted_penularan_indigenus >= 1) {
         peringatanTerdeteksi.push({
           id: `malaria-eliminasi-${item.month}-${item.year}`,
@@ -123,13 +123,14 @@ export const EarlyWarningSystemMalaria = ({
           tahun: item.year,
           metrik: 'Kasus Penularan Lokal',
           nilai: item.predicted_penularan_indigenus,
-          mtom: item.predicted_penularan_indigenus_m_to_m_change,
+          tingkat: item.predicted_penularan_indigenus_m_to_m_change,
+          status_kenaikan: "",
         //   ambang_batas: 1,
         //   tingkat_keparahan: 'tinggi',
           status_endemis:item.status_endemis
         });
       } 
-      else if (tipeAturanEndemis === 'endemis_rendah' && item.predicted_penularan_indigenus_m_to_m_change !== null && item.predicted_penularan_indigenus_m_to_m_change >= 100) {
+      else if (tipeAturanEndemis === 'endemis_rendah' && (item.predicted_penularan_indigenus_m_to_m_change !== null && item.predicted_penularan_indigenus_m_to_m_change >= 100)) {
         // Untuk daerah endemis rendah: 2*kasus indigenous
         peringatanTerdeteksi.push({
           id: `malaria-endemis-low-${item.month}-${item.year}`,
@@ -139,53 +140,124 @@ export const EarlyWarningSystemMalaria = ({
           tahun: item.year,
           metrik: 'Kasus Penularan Lokal',
           nilai: item.predicted_penularan_indigenus,
-          mtom: item.predicted_penularan_indigenus_m_to_m_change,
-        //   ambang_batas: 2,
+          tingkat: item.predicted_penularan_indigenus_m_to_m_change,
+          status_kenaikan: "dari bulan sebelumnya",
+        //   tingkat_keparahan: 'sedang',
+          status_endemis:item.status_endemis
+        });
+      }
+      else if (tipeAturanEndemis === 'endemis_rendah' && (item.predicted_penularan_indigenus_y_on_y_change !== null && item.predicted_penularan_indigenus_y_on_y_change >= 100)) {
+        // Untuk daerah endemis rendah: 2*kasus indigenous
+        peringatanTerdeteksi.push({
+          id: `malaria-endemis-low-${item.month}-${item.year}`,
+          tipe: 'indigenous',
+          lokasi: strLokasi,
+          bulan: namaBulan[item.month - 1],
+          tahun: item.year,
+          metrik: 'Kasus Penularan Lokal',
+          nilai: item.predicted_penularan_indigenus,
+          tingkat: item.predicted_penularan_indigenus_y_on_y_change,
+          status_kenaikan: "dari bulan yang sama di tahun sebelumnya",
         //   tingkat_keparahan: 'sedang',
           status_endemis:item.status_endemis
         });
       } 
-      else if (tipeAturanEndemis === 'endemis_sedang' && item.predicted_penularan_indigenus >= 2) {
-        // Untuk daerah endemis sedang: 2*kasus indigenous
+      else if ((tipeAturanEndemis === 'endemis_sedang' || tipeAturanEndemis === 'endemis_tinggi') && (item.predicted_tot_pos_m_to_m_change !== null && item.predicted_tot_pos_m_to_m_change >= 100)) {
+        // Untuk daerah endemis rendah: 2*kasus indigenous
         peringatanTerdeteksi.push({
-          id: `malaria-endemis-med-${item.month}-${item.year}`,
+          id: `malaria-endemis-low-${item.month}-${item.year}`,
+          tipe: 'indigenous',
+          lokasi: strLokasi,
+          bulan: namaBulan[item.month - 1],
+          tahun: item.year,
+          metrik: 'Kasus Penularan Lokal',
+          nilai: item.predicted_tot_pos_m_to_m_change,
+          tingkat: item.predicted_tot_pos_m_to_m_change,
+          status_kenaikan: "dari bulan sebelumnya",
+        //   tingkat_keparahan: 'sedang',
+          status_endemis:item.status_endemis
+        });
+      }
+      else if ((tipeAturanEndemis === 'endemis_sedang' || tipeAturanEndemis === 'endemis_tinggi') && (item.predicted_tot_pos_y_on_y_change !== null && item.predicted_tot_pos_y_on_y_change >= 100)) {
+        // Untuk daerah endemis rendah: 2*kasus indigenous
+        peringatanTerdeteksi.push({
+          id: `malaria-endemis-low-${item.month}-${item.year}`,
           tipe: 'indigenous',
           lokasi: strLokasi,
           bulan: namaBulan[item.month - 1],
           tahun: item.year,
           metrik: 'Kasus Penularan Lokal',
           nilai: item.predicted_penularan_indigenus,
-          mtom: item.predicted_penularan_indigenus_m_to_m_change,
-        //   ambang_batas: 2,
+          tingkat: item.predicted_tot_pos_y_on_y_change,
+          status_kenaikan: "dari bulan yang sama di tahun sebelumnya",
         //   tingkat_keparahan: 'sedang',
-          status_endemis: item.status_endemis
+          status_endemis:item.status_endemis
         });
-      }
-      else if (tipeAturanEndemis === 'endemis_tinggi' && item.predicted_penularan_indigenus >= 2) {
-        // Untuk daerah endemis tinggi: 2*kasus indigenous
-        peringatanTerdeteksi.push({
-          id: `malaria-endemis-high-${item.month}-${item.year}`,
-          tipe: 'indigenous',
-          lokasi: strLokasi,
-          bulan: namaBulan[item.month - 1],
-          tahun: item.year,
-          metrik: 'Kasus Penularan Lokal',
-          nilai: item.predicted_penularan_indigenus,
-          mtom: item.predicted_penularan_indigenus_m_to_m_change,
-        //   ambang_batas: 2,
-        //   tingkat_keparahan: 'sedang',
-          status_endemis: item.status_endemis
-        });
-      }
+      } 
     });
   
     return peringatanTerdeteksi;
   };
 
-  // Fungsi pembantu untuk mendapatkan string lokasi yang diformat
-  
-
-  
+  // Render pesan peringatan yang diformat berdasarkan status endemis
+  const renderWarningMessage = (warning: Peringatan) => {
+    const tipeAturanEndemis = dapatkanTipeAturanEndemis(warning.status_endemis);
+    
+    // Format pesan untuk daerah eliminasi
+    if (tipeAturanEndemis === 'eliminasi') {
+      return (
+        <Text fw={500}>
+          {warning.bulan} {warning.tahun}: Terdeteksi {warning.nilai !== null ? (warning.nilai % 1 === 0 ? Math.floor(warning.nilai) : warning.nilai.toFixed(1)) : 'N/A'} kasus penularan lokal di {warning.lokasi} (Daerah {warning.status_endemis})
+        </Text>
+      );
+    }
+    
+    // Format pesan untuk daerah endemis rendah (month-to-month)
+    else if (tipeAturanEndemis === 'endemis_rendah' && warning.status_kenaikan.includes('bulan sebelumnya')) {
+      return (
+        <Text fw={500}>
+          {warning.bulan} {warning.tahun}: Penularan lokal di {warning.lokasi} meningkat {warning.tingkat !== null ? (warning.tingkat % 1 === 0 ? Math.floor(warning.tingkat) : warning.tingkat.toFixed(1)) : 'N/A'}% dari bulan sebelumnya (Daerah {warning.status_endemis})
+        </Text>
+      );
+    }
+    
+    // Format pesan untuk daerah endemis rendah (year-on-year)
+    else if (tipeAturanEndemis === 'endemis_rendah' && warning.status_kenaikan.includes('tahun sebelumnya')) {
+      return (
+        <Text fw={500}>
+          {warning.bulan} {warning.tahun}: Penularan lokal di {warning.lokasi} meningkat {warning.tingkat !== null ? (warning.tingkat % 1 === 0 ? Math.floor(warning.tingkat) : warning.tingkat.toFixed(1)) : 'N/A'}% dibanding periode yang sama tahun lalu (Daerah {warning.status_endemis})
+        </Text>
+      );
+    }
+    
+    // Format pesan untuk daerah endemis sedang/tinggi (month-to-month)
+    else if ((tipeAturanEndemis === 'endemis_sedang' || tipeAturanEndemis === 'endemis_tinggi') && warning.status_kenaikan.includes('bulan sebelumnya')) {
+      return (
+        <Text fw={500}>
+          {warning.bulan} {warning.tahun}: Total kasus malaria di {warning.lokasi} meningkat {warning.tingkat !== null ? (warning.tingkat % 1 === 0 ? Math.floor(warning.tingkat) : warning.tingkat.toFixed(1)) : 'N/A'}% dari bulan sebelumnya (Daerah {warning.status_endemis})
+        </Text>
+      );
+    }
+    
+    // Format pesan untuk daerah endemis sedang/tinggi (year-on-year)
+    else if ((tipeAturanEndemis === 'endemis_sedang' || tipeAturanEndemis === 'endemis_tinggi') && warning.status_kenaikan.includes('tahun sebelumnya')) {
+      return (
+        <Text fw={500}>
+          {warning.bulan} {warning.tahun}: Total kasus malaria di {warning.lokasi} meningkat {warning.tingkat !== null ? (warning.tingkat % 1 === 0 ? Math.floor(warning.tingkat) : warning.tingkat.toFixed(1)) : 'N/A'}% dibanding periode yang sama tahun lalu (Daerah {warning.status_endemis})
+        </Text>
+      );
+    }
+    
+    // Format default jika tidak ada yang cocok
+    return (
+      <Text fw={500}>
+        {warning.bulan} {warning.tahun}: {warning.metrik} di {warning.lokasi} 
+        {warning.status_endemis.includes('Eliminasi') 
+            ? ` terjadi penularan indigenous sebesar ${warning.nilai !== null ? (warning.nilai % 1 === 0 ? Math.floor(warning.nilai) : warning.nilai.toFixed(1)) : 'N/A'}% (${warning.status_endemis})`
+            : ` mengalami peningkatan sebesar ${warning.tingkat !== null ? (warning.tingkat % 1 === 0 ? Math.floor(warning.tingkat) : warning.tingkat.toFixed(1)) : 'N/A'}% ${warning.status_kenaikan} (${warning.status_endemis})`}
+      </Text>
+    );
+  };
 
   // Render rekomendasi pengobatan berdasarkan peringatan
   const renderRekomendasi = () => {
@@ -227,16 +299,6 @@ export const EarlyWarningSystemMalaria = ({
       itemPemantauan.push(
         "Tingkatkan surveilans entomologi di daerah penularan lokal",
         "Lakukan pemetaan tempat perkembangbiakan di komunitas yang terkena dampak"
-      );
-    } else if (peringatanTerpilih.tipe === 'fatality') {
-      itemRekomendasi.push(
-        "Segera tinjau protokol manajemen klinis",
-        "Audit semua kasus kematian malaria untuk mengidentifikasi potensi masalah sistemik",
-        "Pastikan ketersediaan persediaan pengobatan malaria berat (artesunat intravena)"
-      );
-      itemPemantauan.push(
-        "Pantau kepatuhan pengobatan dan tindak lanjut kasus berat",
-        "Lacak komorbiditas yang terkait dengan hasil fatal"
       );
     }
 
@@ -354,25 +416,21 @@ export const EarlyWarningSystemMalaria = ({
       <Stack gap="xs" mb="md">
         {/* Tampilkan 3 peringatan pertama */}
         {peringatan.slice(0, 3).map((warning) => (
-          <Group key={warning.id} justify="space-between">
-            <Group gap="xs">
+          <Group key={warning.id} justify="space-between" align="flex-start" wrap="nowrap">
+            <Group gap="xs" wrap="nowrap" style={{ flex: 1 }}>
               <ThemeIcon 
                 color={'red'} 
                 variant="light"
               >
                 <IconAlertTriangle size={16} />
               </ThemeIcon>
-              <Text size="sm">
-                {warning.bulan} {warning.tahun}: {warning.metrik} di {warning.lokasi}  
-                {warning.tipe === 'fatality' 
-                  ? ` mengalami peningkatan sebesar ${warning.mtom !== null ? warning.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (${warning.status_endemis})`
-                  : ` mengalami peningkatan sebesar ${warning.mtom !== null ? warning.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (${warning.status_endemis})`}
-              </Text>
+              {renderWarningMessage(warning)}
             </Group>
             
             <Button 
               variant="subtle" 
               onClick={() => bukaRekomendasi(warning)}
+              style={{ flexShrink: 0, minWidth: '120px' }}
             >
               <IconArrowRight size={16} />
               Rekomendasi
@@ -383,19 +441,14 @@ export const EarlyWarningSystemMalaria = ({
         {/* Tampilkan semua peringatan lainnya jika showAllWarnings = true */}
         {showAllWarnings && peringatan.slice(3).map((warning) => (
           <Group key={warning.id} justify="space-between">
-            <Group gap="xs">
+            <Group gap="xs" wrap="nowrap" style={{ flex: 1 }}>
               <ThemeIcon 
                 color={'red'} 
                 variant="light"
               >
                 <IconAlertTriangle size={16} />
               </ThemeIcon>
-              <Text size="sm">
-                {warning.bulan} {warning.tahun}: {warning.metrik} di {warning.lokasi} 
-                {warning.tipe === 'fatality' 
-                  ? ` mengalami peningkatan sebesar ${warning.mtom !== null ? warning.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (${warning.status_endemis})`
-                  : ` mengalami peningkatan sebesar ${warning.mtom !== null ? warning.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (${warning.status_endemis} )`}
-              </Text>
+              {renderWarningMessage(warning)}
             </Group>
             
             <Button 
@@ -438,11 +491,7 @@ export const EarlyWarningSystemMalaria = ({
             color={'red'}
             mb="md"
           >
-            <Text fw={500}>
-              {peringatanTerpilih.bulan} {peringatanTerpilih.tahun}: {peringatanTerpilih.metrik} di {peringatanTerpilih.lokasi} 
-              {peringatanTerpilih.tipe === 'fatality' 
-                  ? ` mengalami peningkatan sebesar ${peringatanTerpilih.mtom !== null ? peringatanTerpilih.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (${peringatanTerpilih.status_endemis})`
-                  : ` mengalami peningkatan sebesar ${peringatanTerpilih.mtom !== null ? peringatanTerpilih.mtom.toFixed(2) : 'N/A'} % dari bulan sebelumnya (${peringatanTerpilih.status_endemis})`}            </Text>
+            {renderWarningMessage(peringatanTerpilih)}
           </Alert>
           
           {renderRekomendasi()}
