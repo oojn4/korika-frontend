@@ -109,10 +109,8 @@ function ChartTooltip({ label, payload }: ChartTooltipProps) {
             const textColor = item.type === 'predicted' ? 'gray' : item.color;
             
             // Round the value to 2 decimal places if it's a number
-            const displayValue = typeof item.value === 'number' 
-              ? Number(item.value).toFixed(2)
-              : item.value;
-            
+            const displayValue = ((typeof item.value === 'number') && (item.value  % 1 === 0)) ? item.value:Number(item.value).toFixed(2);
+
             return (
               <Text 
                 key={`${item.name}-${item.type}`} 
@@ -317,13 +315,13 @@ const Statbox: React.FC<StatboxProps> = ({
           yAxisLabel={leftAxisLabel}
           rightYAxisLabel={rightAxisLabel}
           yAxisProps={{
-            domain: [getMinYValueLeft().toFixed(2), getMaxYValueLeft().toFixed(2)],
+            domain: [getMinYValueLeft() % 1 === 0 ? getMinYValueLeft().toFixed(2):getMinYValueLeft(), getMaxYValueLeft() % 1 === 0 ? getMaxYValueLeft().toFixed(2):getMaxYValueLeft()],
             tickCount: 6,
             orientation: 'left',
             tickFormatter: (value: number) => value % 1 === 0 ? `${value}` : `${value.toFixed(2)}`
           }}
           rightYAxisProps={useDualAxis ? {
-            domain: [getMinYValueRight().toFixed(2), getMaxYValueRight().toFixed(2)],
+            domain: [getMinYValueRight() % 1 === 0 ? getMinYValueRight().toFixed(2):getMinYValueRight(), getMaxYValueRight() % 1 === 0 ? getMaxYValueRight().toFixed(2):getMaxYValueRight()],
             tickCount: 6,
             orientation: 'right',
             stroke: '#777', // Add explicit stroke color
@@ -352,12 +350,12 @@ const Statbox: React.FC<StatboxProps> = ({
               yAxisLabel={leftAxisLabel}
               rightYAxisLabel={rightAxisLabel}
               yAxisProps={{
-                domain: [getMinYValueLeft().toFixed(2), getMaxYValueLeft().toFixed(2)],
+                domain: [getMinYValueLeft() % 1 === 0 ? getMinYValueLeft().toFixed(2):getMinYValueLeft(), getMaxYValueLeft() % 1 === 0 ? getMaxYValueLeft().toFixed(2):getMaxYValueLeft()],
                 tickCount: 6,
                 tickFormatter: (value: number) => `${value.toFixed(2)}`
               }}
               rightYAxisProps={useDualAxis ? {
-                domain: [getMinYValueRight().toFixed(2), getMaxYValueRight().toFixed(2)],
+                domain: [getMinYValueRight() % 1 === 0 ? getMinYValueRight().toFixed(2):getMinYValueRight(), getMaxYValueRight() % 1 === 0 ? getMaxYValueRight().toFixed(2):getMaxYValueRight()],
                 tickCount: 6,
                 orientation: 'right',
                 stroke: '#777',
