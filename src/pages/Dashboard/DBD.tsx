@@ -1418,7 +1418,6 @@ const DBDPage = () => {
             onChange={setStartDate}
             minDate={new Date(2019, 0, 1)} // 0 = January in JavaScript Date
             maxDate={endDate || undefined}
-            valueFormat='MM-YYYY'
           />
 
           <MonthPickerInput 
