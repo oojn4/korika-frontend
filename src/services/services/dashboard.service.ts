@@ -69,18 +69,8 @@ export const DashboardService = {
     start_month_year?: string, 
     end_month_year?: string
   ): Promise<any> {
-    let url = `${baseUrl}/get-aggregate-data-dbd?province=${province}`;
-    
-    if (city) {
-      url += `&city=${city}`;
-    }
-    
-    if (start_month_year && end_month_year) {
-      url += `&start=${start_month_year}&end=${end_month_year}`;
-    }
-    
     const res = await ApiService.fetchData<undefined, any>({
-      url: url,
+      url: `${baseUrl}/get-aggregate-data-dbd?province=${province}&city=${city}&start=${start_month_year}&end=${end_month_year}`,
       method: 'GET',
     });
     
@@ -127,18 +117,9 @@ export const DashboardService = {
     start_month_year?: string, 
     end_month_year?: string
   ): Promise<any> {
-    let url = `${baseUrl}/get-aggregate-data-lepto?province=${province}`;
-    
-    if (city) {
-      url += `&city=${city}`;
-    }
-    
-    if (start_month_year && end_month_year) {
-      url += `&start=${start_month_year}&end=${end_month_year}`;
-    }
     
     const res = await ApiService.fetchData<undefined, any>({
-      url: url,
+      url: `${baseUrl}/get-aggregate-data-lepto?province=${province}&city=${city}&start=${start_month_year}&end=${end_month_year}`,
       method: 'GET',
     });
     
