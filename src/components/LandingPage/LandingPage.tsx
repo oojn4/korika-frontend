@@ -8,9 +8,9 @@ import classes from './LandingPage.module.css';
 const heroImage = '/logo_maskot-removebg-preview.png';
 // Dummy logos - replace with actual logos later
 const dummyLogos = {
-  korika: '/korika-merah.png',
   kemenkes: '/kemenkes.png',
   bmkg: '/bmkg.png',
+  korika: '/korika-merah.png',
   imacs: '/imacs.png',
 };
 

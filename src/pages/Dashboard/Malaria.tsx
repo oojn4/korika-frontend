@@ -1549,7 +1549,9 @@ useEffect(() => {
 
   // Render main dashboard content
   const renderDashboardContent = () => {
-    const formattedPredictionDate = predictedMonthYear ? convertDateFormat(predictedMonthYear) : 'N/A';
+    // const formattedPredictionDate = predictedMonthYear ? convertDateFormat(predictedMonthYear) : 'N/A';
+    const formattedStartDate = startDate ? convertDateFormat(`${(startDate.getMonth()+1).toString()}-${startDate.getFullYear().toString()}`) : 'N/A';
+    const formattedEndDate = endDate ? convertDateFormat(`${(endDate.getMonth()+1).toString()}-${endDate.getFullYear().toString()}`) : 'N/A';
   
     return (
       <>
@@ -1562,7 +1564,7 @@ useEffect(() => {
           <div>
             <Title order={4}>Tren dan Prediksi</Title>
             <Text size="sm" color="dimmed">
-              Menampilkan data historis dan prediksi hingga {formattedPredictionDate}
+              Menampilkan data historis dan prediksi dari {formattedStartDate} sampai dengan {formattedEndDate}
             </Text>
           </div>
           <Badge 
