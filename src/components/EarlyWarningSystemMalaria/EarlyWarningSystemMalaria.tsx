@@ -207,7 +207,7 @@ export const EarlyWarningSystemMalaria = ({
     if (tipeAturanEndemis === 'eliminasi') {
       return (
         <Text fw={500}>
-          {warning.bulan} {warning.tahun}: Terdeteksi {warning.nilai !== null ? (warning.nilai % 1 === 0 ? Math.floor(warning.nilai) : warning.nilai.toFixed(1)) : 'N/A'} kasus penularan lokal di {warning.lokasi} (Daerah {warning.status_endemis})
+          {warning.bulan} {warning.tahun}: Terdeteksi prediksi {warning.nilai !== null ? (warning.nilai % 1 === 0 ? Math.floor(warning.nilai) : warning.nilai.toFixed(1)) : 'N/A'} kasus penularan lokal di {warning.lokasi} (Daerah {warning.status_endemis})
         </Text>
       );
     }
@@ -234,7 +234,7 @@ export const EarlyWarningSystemMalaria = ({
     else if ((tipeAturanEndemis === 'endemis_sedang' || tipeAturanEndemis === 'endemis_tinggi') && warning.status_kenaikan.includes('bulan sebelumnya')) {
       return (
         <Text fw={500}>
-          {warning.bulan} {warning.tahun}: Total kasus malaria di {warning.lokasi} meningkat {warning.tingkat !== null ? (warning.tingkat % 1 === 0 ? Math.floor(warning.tingkat) : warning.tingkat.toFixed(1)) : 'N/A'}% dari bulan sebelumnya (Daerah {warning.status_endemis})
+          {warning.bulan} {warning.tahun}: Total prediksi kasus malaria di {warning.lokasi} meningkat {warning.tingkat !== null ? (warning.tingkat % 1 === 0 ? Math.floor(warning.tingkat) : warning.tingkat.toFixed(1)) : 'N/A'}% dari bulan sebelumnya (Daerah {warning.status_endemis})
         </Text>
       );
     }
@@ -243,7 +243,7 @@ export const EarlyWarningSystemMalaria = ({
     else if ((tipeAturanEndemis === 'endemis_sedang' || tipeAturanEndemis === 'endemis_tinggi') && warning.status_kenaikan.includes('tahun sebelumnya')) {
       return (
         <Text fw={500}>
-          {warning.bulan} {warning.tahun}: Total kasus malaria di {warning.lokasi} meningkat {warning.tingkat !== null ? (warning.tingkat % 1 === 0 ? Math.floor(warning.tingkat) : warning.tingkat.toFixed(1)) : 'N/A'}% dibanding periode yang sama tahun lalu (Daerah {warning.status_endemis})
+          {warning.bulan} {warning.tahun}: Total prediksi kasus malaria di {warning.lokasi} meningkat {warning.tingkat !== null ? (warning.tingkat % 1 === 0 ? Math.floor(warning.tingkat) : warning.tingkat.toFixed(1)) : 'N/A'}% dibanding periode yang sama tahun lalu (Daerah {warning.status_endemis})
         </Text>
       );
     }

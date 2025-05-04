@@ -1648,9 +1648,9 @@ useEffect(() => {
                 { name: 'actual_tot_pos', color: 'red.6',yAxisId:'left' },
               ]}
               isCollapsible
-              useDualAxis={true}
-              leftAxisLabel="Kasus Malaria"
-              rightAxisLabel="Ibu Hamil dengan Malaria"
+              useDualAxis={false}
+              // leftAxisLabel="Kasus Malaria"
+              // rightAxisLabel="Ibu Hamil dengan Malaria"
             />
           </Box>
           <Box>
@@ -1667,9 +1667,9 @@ useEffect(() => {
                 { name: 'actual_tot_pos', color: 'red.6',yAxisId:'left' },
               ]}
               isCollapsible
-              useDualAxis={true}
-              leftAxisLabel="Kasus Malaria"
-              rightAxisLabel="Kematian dengan Malaria"
+              useDualAxis={false}
+              // leftAxisLabel="Kasus Malaria"
+              // rightAxisLabel="Kematian dengan Malaria"
             />
           </Box>
           
@@ -1714,7 +1714,7 @@ useEffect(() => {
                 // { name: 'predicted_tot_pos', color: 'grey' },
                 // { name: 'predicted_p_suspek_pk', color: 'grey' },
                 { name: 'actual_p_pf', color: 'blue.6' },
-                { name: 'actual_p_pv', color: 'lime.6' },
+                { name: 'actual_p_pv', color: 'yellow.6' },
                 { name: 'actual_p_others', color: 'green.6' },
                 // { name: 'actual_p_po', color: 'green.6' },
                 // { name: 'actual_p_pm', color: 'lime.6' },
@@ -1738,7 +1738,7 @@ useEffect(() => {
                 { name: 'predicted_penularan_indigenus', color: 'grey' },
                 { name: 'predicted_penularan_impor', color: 'grey' },
                 { name: 'predicted_penularan_induced', color: 'grey' },
-                { name: 'actual_penularan_indigenus', color: 'indigo.6' },
+                { name: 'actual_penularan_indigenus', color: 'orange.6' },
                 { name: 'actual_penularan_impor', color: 'blue.6' },
                 { name: 'actual_penularan_induced', color: 'teal.6' },
               ]}
